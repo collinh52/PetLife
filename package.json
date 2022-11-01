@@ -1,0 +1,14 @@
+{
+    "name": "node",
+    "main": "index.js",
+    "dependencies": {
+        "express": "^4.6.1",
+        "pg-promise": "^10.11.1",
+        "dotenv": "^16.0.3",
+        "body-parser": "1.20.0"
+    },
+    "scripts": {
+        "prestart": "npm install",
+        "start": "node index.js"
+    }
+}
