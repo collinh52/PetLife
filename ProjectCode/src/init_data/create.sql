@@ -8,8 +8,7 @@ CREATE TABLE users(
     email VARCHAR(50),
     pet_type VARCHAR(50),
     birthday VARCHAR(50),
-    joined_timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-
+    joined_timestamp TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 DROP TABLE IF EXISTS posts CASCADE;
@@ -66,11 +65,13 @@ DROP TABLE IF EXISTS communities CASCADE;
 CREATE TABLE communities (
     communitiy_id INTEGER AUTO_INCREMENT PRIMARY KEY,
     community_name VARCHAR(50) NOT NULL
-
 );
 
 DROP TABLE IF EXISTS community_member CASCADE;
 CREATE TABLE community_member (
-
-
+    username INTEGER NOT NULL,
+    communitiy_id INTEGER NOT NULL,
+    FOREIGN KEY(username) REFERENCES users(username),
+    FOREIGN KEY(communitiy_id) REFERENCES communities(community_id),
+    PRIMARY KEY(username, communitiy_id)
 );
