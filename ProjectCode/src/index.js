@@ -12,7 +12,11 @@ const message = 'Hey there!';
 
 // defining a default endpoint
 app.get('/', (req, res) => {
-  res.send(message);
+  res.send(message)
+});
+
+app.get('/home', (req, res) => {
+  res.render('pages/home.ejs')
 });
 
 const pgp = require('pg-promise')();
