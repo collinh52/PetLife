@@ -2,6 +2,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+//importing cloudinary libraries
+var cloudinary = require('cloudinary');
+
+
 // defining the Express app
 const app = express();
 
@@ -29,6 +33,16 @@ const dbConfig = {
 };
 
 const db = pgp(dbConfig);
+
+//////////////////////////////CLOUDINARY SETUP////////////////////////////
+
+cloudinary.config({ 
+  cloud_name: 'diaoicqwt', 
+  api_key: '977326122325792', 
+  api_secret: 'WnmdmGp6TPC4lNye657MmlmzorI' 
+});
+
+
 
 app.listen(3000, () => {
   console.log('listening on port 3000');
