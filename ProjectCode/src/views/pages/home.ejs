@@ -1,22 +1,37 @@
 
 <main>
   <div class="container" style="display: flex; flex-direction: row; padding-right: 0;">
-    hola
+    left bar (if we have one) goes here
     <div class="container">
-      hoola
+      post feed goes here
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-action">
+          Post 1
+          <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftownsquare.media%2Fsite%2F40%2Ffiles%2F2017%2F03%2FDog-.jpg%3Fw%3D1200%26h%3D0%26zc%3D1%26s%3D0%26a%3Dt%26q%3D89&f=1&nofb=1&ipt=e9d5a8838caab06fb2de48a4fac120ccc93763fd86215fab957bade22d0432fa&ipo=images" width="500">
+        </li>
+        <li href="/profile" class="list-group-item list-group-item-action">
+          Post 2
+          <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.thefarmersdog.com%2Fdigest%2Fwp-content%2Fuploads%2F2020%2F05%2FEars-pitbull-2-scaled.jpg&f=1&nofb=1&ipt=f013b081ef7309b209c55e0ae01a8cc0e394ff593622b672d97187aee0221cba&ipo=images" width="500">
+        </li>
+        <li href="/profile/friends" class="list-group-item list-group-item-action">
+          Post 3
+          <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fimages6.fanpop.com%2Fimage%2Fphotos%2F35200000%2FDog-dogs-35247719-3706-2480.jpg&f=1&nofb=1&ipt=80b3ab1fbc7e4bdf4a162ffffb8b77e98ce2a1d448d9952826642cc696aee0b9&ipo=images" width="500">
+        </li>
+      </ul>
     </div>
-    <ul class="list-group" style="background-color: gray;">
-      <li class="list-group-item">
+    <ul class="list-group">
+      <a href="/" class="list-group-item list-group-item-action active">
+        Post (do we want a modal or a separate page for this?)
+      </a>
+      <a href="/profile" class="list-group-item list-group-item-action">
         Profile
-      </li>
-      <li class="list-group-item">
-        Post
-      </li>
-      <li class="list-group-item">
+      </a>
+      <a href="/profile/friends" class="list-group-item list-group-item-action">
         Friends
-      </li>
+      </a>
     </ul>
   </div>
+  <!-- TODO: Move these two to the partials so that they are in every page instead of just the home page. -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
 </main>
