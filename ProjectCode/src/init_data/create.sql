@@ -13,7 +13,7 @@ CREATE TABLE users(
 
 DROP TABLE IF EXISTS posts CASCADE;
 CREATE TABLE posts(
-    post_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    post_id INTEGER SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     post_timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
     picture_id INTEGER,
@@ -28,21 +28,21 @@ CREATE TABLE posts(
 
 DROP TABLE IF EXISTS pictures CASCADE;
 CREATE TABLE pictures (
-    picture_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    picture_id INTEGER SERIAL PRIMARY KEY,
     picture_url TEXT NOT NULL,
     post_id	INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS videos CASCADE;
 CREATE TABLE videos (
-  video_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  video_id INTEGER SERIAL PRIMARY KEY,
   video_url TEXT NOT NULL,
   post_id INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS comments CASCADE;
 CREATE TABLE comments (
-    comment_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    comment_id INTEGER SERIAL PRIMARY KEY,
     comment_text VARCHAR(255) NOT NULL,
     post_id INTEGER NOT NULL,
     username INTEGER NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE followers (
 
 DROP TABLE IF EXISTS communities CASCADE;
 CREATE TABLE communities (
-    communitiy_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    communitiy_id INTEGER SERIAL PRIMARY KEY,
     community_name VARCHAR(50) NOT NULL
 );
 
