@@ -1,7 +1,7 @@
 // importing the dependencies
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const bcrypt = require('bcrypt');
 const app = express();
 const pgp = require('pg-promise')();
 
@@ -55,12 +55,11 @@ app.listen(3000, () => {
 // Register submission
 app.post('/register', async (req, res) => {
   //the logic goes here
-  //const hash = await bcrypt.hash(req.body.password, 10);
-  //res.send(req.body.username);
+  const hash = await bcrypt.hash(req.body.password, 10);
   db.tx(async t => {
     await t.none(
       'INSERT INTO users(username, password) VALUES ($1, $2);',
-      [req.body.username, req.body.password]
+      [req.body.username, hash]
     )
     .then(data => {
       //res.send("Success");

@@ -4,6 +4,7 @@
     "dependencies": {
         "express": "^4.6.1",
         "pg-promise": "^10.11.1",
+        "bcrypt": "^5.1.0",
         "dotenv": "^16.0.3",
         "body-parser": "1.20.0"
     },
