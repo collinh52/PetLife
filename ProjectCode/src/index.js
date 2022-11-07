@@ -21,12 +21,12 @@ require('dotenv').config();
 // TODO: uncomment next parts for when database is finished
 
 const dbConfig = {
-  host: 'db',
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  };
+    host: 'db',
+    port: 5432,
+    database: process.env.POSTGRES_DB,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+};
 
 const db = pgp(dbConfig);
 
