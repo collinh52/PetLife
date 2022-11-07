@@ -37,9 +37,8 @@ app.listen(3000, () => {
 // Register submission
 app.post('/register', async (req, res) => {
   //the logic goes here
-
-  /*
   //const hash = await bcrypt.hash(req.body.password, 10);
+  //res.send(req.body.username);
   db.tx(async t => {
     await t.none(
       'INSERT INTO users(username, password) VALUES ($1, $2);',
@@ -50,16 +49,18 @@ app.post('/register', async (req, res) => {
       //res.send(data);
     })
     .catch(err => {
+      res.send("didn't work");
       console.log(err);
     });
   });
-  */
+  
 });
 
 
 
 app.get('/register_test', function (req, res) {
   var query =`SELECT username FROM users`;
+  res.send("l;asdfj");
   db.any(query)
     .then(function (rows) {
       res.send("l;asdfj");

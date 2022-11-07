@@ -1,0 +1,2 @@
+INSERT INTO users (username, password, profile_name, bio, profile_image_url, email, pet_type, birthday, joined_timestamp) VALUES 
+('COOLusername', '1234', 'thisisprofilename', ';lajsdflajsdf', 'emailname', 'dog', ';alsdkjf', '123321');
