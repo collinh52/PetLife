@@ -8,3 +8,5 @@ Test Plan (11/3): https://docs.google.com/document/d/1YdMtUUgVP3ZXwBPKmfMQyt4p0z
 
 ## Meeting Notes
 Meeting 1 (10/31): https://docs.google.com/document/d/1zARnKDRLjixuJ1bnTgRjCeNkDdLBQIXI1nYSaHkuFGo/edit?usp=sharing
+
+Meeting 2 (11/7): https://docs.google.com/document/d/1eM8d9xV1PMcVgTZ-ZOHRYXwq8NL_x8GINuxMHkaBV4I/edit?usp=sharing

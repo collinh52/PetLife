@@ -8,19 +8,19 @@ services:
     volumes:
       - PetLife:/var/lib/postgresql/data
       - ./init_data:/docker-entrypoint-initdb.d
-
   web:
     image: node:lts
     user: 'node'
     working_dir: /home/node/app
     environment:
       - NODE_ENV=development
+    env_file: .env
     depends_on:
       - db
     ports:
       - '3000:3000'
     volumes:
-      - ./src:/home/node/app
+      - ./:/home/node/app
     command: 'npm start'
 # This defines our volume(s), which will persist throughout startups.
 # If you want to get rid of a hanging volume, e.g. to test your database init,
