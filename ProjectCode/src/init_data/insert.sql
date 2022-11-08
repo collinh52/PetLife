@@ -19,7 +19,17 @@ INSERT INTO comments (comment_id, comment_text, post_id, username) values (1, 'V
 INSERT INTO followers (follower_id, following_id) VALUES ('collin', 'johnson'),
 ('johnson', 'collin');
 
-INSERT INTO communities (community_id, community_name) VALUES (1, 'Dogs');
+INSERT INTO communities (community_id, community_name) VALUES 
+(1, 'Dogs'),
+(2, 'Cats'),
+(3,'Fish'),
+(4,'Horses'),
+(5,'Birds');
 
-INSERT INTO community_member (username, community_id) VALUES ('collin', 1);
+INSERT INTO community_member (username, community_id) VALUES 
+('collin', 1),
+('johnson',2),
+('fishlover5',3),
+('mary',4),
+('tweet',5);
 
