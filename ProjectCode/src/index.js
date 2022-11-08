@@ -5,10 +5,15 @@ const bcrypt = require('bcrypt');
 const app = express();
 const pgp = require('pg-promise')();
 
-//const session = require('express-session');
+app.set('view engine', 'ejs');
 
 // using bodyParser to parse JSON in the request body into JS objects
 app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
 const message = 'Hey there!';
 
@@ -18,10 +23,6 @@ app.get('/', (req, res) => {
 });
 
 require('dotenv').config();
-//const path = require('path');
-//console.log(require('dotenv').config({path: path.resolve(__dirname, '../.env')}));
-
-// TODO: uncomment next parts for when database is finished
 
 const dbConfig = {
     host: 'db',
@@ -52,39 +53,38 @@ app.listen(3000, () => {
   console.log('listening on port 3000');
 });
 
+app.get('/register', (req, res) => {
+  res.render('pages/register');
+});
+
 // Register submission
 app.post('/register', async (req, res) => {
-  //the logic goes here
-  const hash = await bcrypt.hash(req.body.password, 10);
+ const hash = await bcrypt.hash(req.body.password, 10);
+ //res.send(req.body.username);
   db.tx(async t => {
     await t.none(
       'INSERT INTO users(username, password) VALUES ($1, $2);',
       [req.body.username, hash]
     )
     .then(data => {
-      //res.send("Success");
-      res.send(data);
+      res.redirect('/login');
     })
     .catch(err => {
-      res.send("didn't work");
+      res.send("Username taken, registration failed.");
+      //res.redirect('/register');
       console.log(err);
     });
   });
-  
 });
 
-
-
+// Function to list users
 app.get('/register_test', function (req, res) {
   var query ="SELECT * FROM users";
-  //res.send("Register test reached");
-  //res.send(dbConfig.database);
   db.any(query)
     .then(function (rows) {
       res.send(rows);
     })
     .catch(function (err) {
-      // handle an error
       return console.log(err);
     });
 });
