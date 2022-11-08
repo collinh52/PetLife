@@ -17,7 +17,10 @@ INSERT INTO likes (like_id, post_id, username) VALUES (1, 1, 'johnson');
 INSERT INTO comments (comment_id, comment_text, post_id, username) values (1, 'Very cool', 1, 'johnson');
 
 INSERT INTO followers (follower_id, following_id) VALUES ('collin', 'johnson'),
-('johnson', 'collin');
+('johnson', 'collin')
+('mary','tweet'),
+('tweet','mary'),
+('john','mary');
 
 INSERT INTO communities (community_id, community_name) VALUES 
 (1, 'Dogs'),
