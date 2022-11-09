@@ -9,18 +9,20 @@ INSERT INTO pictures (picture_id, picture_url, post_id) VALUES (1, 'https://hips
 
 -- INSERT INTO videos (video_id, video_url, post_id) VALUES ();
 
-INSERT INTO posts (post_id, username, picture_id, caption, location) VALUES (1, 'collin', 1, 'Heres my dog', 'Boulder, CO');
--- INSERT INTO posts (post_id, username, post_timestamp, picture_id, video_id, caption, location) VALUES ();
+INSERT INTO posts (post_id, username, picture_id, caption, location) VALUES (1, 'collin', 1, 'Good boy', 'Boulder, CO');
 
-INSERT INTO likes (like_id, post_id, username) VALUES (1, 1, 'johnson');
+
+INSERT INTO likes (like_id, post_id, username) VALUES (1, 1, 'johnson'),
+(2,1,'mary'),
+(3,1,'tweet');
 
 INSERT INTO comments (comment_id, comment_text, post_id, username) values (1, 'Very cool', 1, 'johnson');
 
 INSERT INTO followers (follower_id, following_id) VALUES ('collin', 'johnson'),
-('johnson', 'collin')
+('johnson', 'collin'),
 ('mary','tweet'),
 ('tweet','mary'),
-('john','mary');
+('johnson','mary');
 
 INSERT INTO communities (community_id, community_name) VALUES 
 (1, 'Dogs'),
