@@ -135,9 +135,14 @@ app.get('/register_test', function (req, res) {
     });
 });
 
+app.get('/logout', (req, res) =>{
+  req.session.destroy();
+  res.render('pages/login');
+  message.log('Logged out Successfully');
+});
+
 // Authentication Required
 app.use(auth);
-
 
 app.listen(3000, () => {
   console.log('listening on port 3000');
