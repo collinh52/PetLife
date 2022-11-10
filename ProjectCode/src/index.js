@@ -5,6 +5,11 @@ const bcrypt = require('bcrypt');
 const app = express();
 const pgp = require('pg-promise')();
 
+const user = {
+  username: undefined,
+  password: undefined,
+};
+
 app.set('view engine', 'ejs');
 
 // using bodyParser to parse JSON in the request body into JS objects
@@ -15,11 +20,15 @@ app.use(
   })
 );
 
-const message = 'Hey there!';
 
+const message = 'Hey there!';
 // defining a default endpoint
 app.get('/', (req, res) => {
-  res.send(message);
+  res.send(message)
+});
+
+app.get('/home', (req, res) => {
+  res.render('pages/home.ejs')
 });
 
 require('dotenv').config();
@@ -49,9 +58,45 @@ db.connect()
   });
 
 
-app.listen(3000, () => {
-  console.log('listening on port 3000');
+app.get('/', (req, res) =>{
+  res.redirect('/login'); //this will call the /login route in the API
 });
+
+app.post('/login', async (req, res) => {
+  const query = `SELECT password FROM users WHERE username = $1;`;
+  db.any(query, [req.body.username])
+  .then(async user => {
+    const match = await bcrypt.compare(req.body.password, user[0].password);
+
+    if(match)
+    {
+    //For when we make profile page in future
+    res.redirect('/home');
+    }
+    else
+    {
+      res.redirect('/register');
+    }
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/login');
+  });
+});
+
+app.get('/login', (req, res) => {
+  res.render('pages/login');
+ });
+
+// Authentication Middleware.
+const auth = (req, res, next) => {
+  console.log(req.session)
+  if (!req.session.user) {
+    // Default to register page.
+    return res.redirect('/register');
+  }
+  next();
+};
 
 app.get('/register', (req, res) => {
   res.render('pages/register');
@@ -88,4 +133,12 @@ app.get('/register_test', function (req, res) {
     .catch(function (err) {
       return console.log(err);
     });
+});
+
+// Authentication Required
+app.use(auth);
+
+
+app.listen(3000, () => {
+  console.log('listening on port 3000');
 });
