@@ -112,8 +112,8 @@ app.post('/register', async (req, res) => {
       [req.body.username, hash]
     )
     .then(data => {
-      // res.send("Registration successful.");
-      res.redirect("/login");
+      //res.send("Registration successful.");
+      res.redirect('/login');
     })
     .catch(err => {
       //res.send("Username taken, registration failed.");
