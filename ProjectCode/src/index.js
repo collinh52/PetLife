@@ -40,7 +40,7 @@ require('dotenv').config();
 const dbConfig = {
     host: 'db',
     port: 5432,
-    
+
     database: process.env.POSTGRES_DB,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
@@ -116,8 +116,8 @@ app.post('/register', async (req, res) => {
       [req.body.username, hash]
     )
     .then(data => {
-      // res.send("Registration successful.");
-      res.redirect("/login");
+      //res.send("Registration successful.");
+      res.redirect('/login');
     })
     .catch(err => {
       //res.send("Username taken, registration failed.");
@@ -145,4 +145,27 @@ app.use(auth);
 
 app.listen(3000, () => {
   console.log('listening on port 3000');
+});
+
+// For future ref, to get number of likes (display on post):
+// SELECT COUNT(like_id) AS num_likes FROM likes;
+
+// Liking
+app.post('/like', function (request, response) {
+  const query =
+    'INSERT INTO likes (post_id, username) VALUES ($1, $2) RETURNING * ;';
+  db.any(query, [
+    request.body.post_id,
+    request.body.username,
+  ])
+    .then(function (data) {
+      response.status(201).json({
+        status: 'success',
+        data: data,
+        message: 'Liked!',
+      });
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
 });
