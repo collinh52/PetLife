@@ -1,0 +1,27 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+<main>
+  <div class="container">
+    <!-- THE REST OF YOUR HTML CODE GOES HERE -->
+    <form action="/new_post" method = "post">
+        <label for="exampleFormControlFile1">Image (file input)</label><br>
+        <input type="file" class="form-control-file" name="image_file" id="exampleFormControlFile1"><br>
+
+        <label for="fname">Image Url</address>:</label><br>
+        <input type="text" id="fname" name="image_url" value=""><br>
+
+        <label for="lname">Caption</label><br>
+        <input type="text" id="lname" name="caption" value=""><br>
+
+        <label for="lname">Location</label><br>
+        <input type="text" id="lname" name="location" value=""><br>
+
+        <br>
+        <a href="/home">Cancel</a>
+        <input type="submit" value="Create Post">
+      </form>
+  </div>
+</main>
+
+<%- include ('../partials/footer') %>
