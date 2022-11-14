@@ -31,6 +31,10 @@ app.get('/home', (req, res) => {
   res.render('pages/home.ejs')
 });
 
+app.get('/post', (req, res) => {
+  res.render('pages/post_page.ejs')
+});
+
 require('dotenv').config();
 
 const dbConfig = {
