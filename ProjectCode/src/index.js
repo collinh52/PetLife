@@ -92,3 +92,58 @@ app.get('/register_test', function (req, res) {
       return console.log(err);
     });
 });
+
+
+app.post('/new_post', function (req, res){
+  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3)";
+  const username = req.body.username;
+  const caption = req.body.caption;
+  const location = req.body.location;
+
+  const post_values = [username, caption, location];
+
+
+  db.any(post_query,post_values)
+    .then(function (data)  {
+    })
+    .catch(function (err)  {
+    });
+
+
+  const {post_id} = await t.one(
+    `SELECT
+      MAX(post_id)
+     FROM
+      posts
+     WHERE
+      username = $1`,
+    [username]
+  );
+  
+  const picture_url = req.body.picture_url;
+  if (picure_url){
+    var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
+    
+    const picture_values = [picture_url,post_id];
+
+    db.any(picture_query,picture_values)
+      .then(function (data)  {
+      })
+      .catch(function (err)  {
+      });
+    
+    const {picture_id} = await t.one(
+      `SELECT
+        MAX(picture_id)
+      FROM
+        pictures
+      WHERE
+        post_id = $1`,
+      [post_id]
+    );
+    
+
+  };
+
+
+});
