@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users(
     username VARCHAR(50) PRIMARY KEY,
     password CHAR(60) NOT NULL,
-    profile_name VARCHAR(60), 
+    profile_name VARCHAR(60),
     bio VARCHAR(250),
     profile_image_url VARCHAR(300),
     email VARCHAR(50),
@@ -41,7 +41,7 @@ CREATE TABLE posts(
 
 DROP TABLE IF EXISTS likes CASCADE;
 CREATE TABLE likes (
-    like_id INTEGER NOT NULL PRIMARY KEY,
+    like_id SERIAL PRIMARY KEY,
     post_id INTEGER NOT NULL,
     username VARCHAR(50) NOT NULL,
     like_timestamp TIMESTAMP DEFAULT NOW(),
