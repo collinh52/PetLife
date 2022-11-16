@@ -31,7 +31,7 @@ app.get('/home', (req, res) => {
   res.render('pages/home.ejs')
 });
 
-app.get('/post', (req, res) => {
+app.get('/new_post', (req, res) => {
   res.render('pages/post_page.ejs')
 });
 
@@ -94,7 +94,6 @@ app.get('/login', (req, res) => {
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
-  console.log(req.session)
   if (!req.session.user) {
     // Default to register page.
     return res.redirect('/register');
