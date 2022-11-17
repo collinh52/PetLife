@@ -7,11 +7,35 @@ const { Column } = require('pg-promise');
 const app = express();
 const pgp = require('pg-promise')();
 const session = require('express-session');
+const path = require("path");
+const multer  = require('multer');
+const fs = require('fs');
+const cloudinary = require("cloudinary").v2;
+
 
 const user = {
   username: undefined,
   password: undefined,
 };
+
+
+//setting up multer for file uploading
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads')
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+})
+const upload = multer({ storage: storage })
+
+//connecting to cloudinary db
+cloudinary.config({
+  cloud_name: 'diaoicqwt',
+  api_key: '977326122325792',
+  api_secret: 'WnmdmGp6TPC4lNye657MmlmzorI'
+});
 
 app.set('view engine', 'ejs');
 
@@ -233,12 +257,33 @@ app.get('/logout', (req, res) =>{
   message.log('Logged out Successfully');
 });
 
-// Authentication Required
-app.use(auth);
 
-app.listen(3000, () => {
-  console.log('listening on port 3000');
-});
+//upload api
+//image is uploaded, added to uploads folder, added to cloudinary, and deleted from uploads folder
+  app.post('/upload', upload.single('image_file'), async (req, res) => {
+
+        await cloudinary.uploader.upload(req.file.path)
+                  .then((result) => {
+                    res.status(200).send({
+                      message: "Image Successfully Uploaded",
+                      result,
+                    });
+                  }).catch((error) => {
+                    res.status(500).send({
+                      message: "Image Upload Failed",
+                      error,
+                    });
+                  });
+
+        await fs.unlink(req.file.path, (err) => {
+          if (err) {
+            console.error(err)
+            return
+          };
+        });
+  });
+
+
 
 // For future ref, to get number of likes (display on post):
 // SELECT COUNT(like_id) AS num_likes FROM likes;
@@ -262,3 +307,10 @@ app.post('/like', function (request, response) {
       return console.log(err);
     });
 });
+
+// Authentication Required
+   app.use(auth);
+
+   app.listen(3000, () => {
+     console.log('listening on port 3000');
+   });
