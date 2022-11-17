@@ -76,6 +76,7 @@ app.post('/login', async (req, res) => {
     {
     //For when we make profile page in future
     res.redirect('/home');
+    // req.session.save()
     }
     else
     {
@@ -94,8 +95,7 @@ app.get('/login', (req, res) => {
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
-  let session_user = req?.session?.user;
-  if (session_user == undefined) {
+  if (req?.session?.user == undefined) {
     // Default to register page.
     return res.redirect('/register');
   }
@@ -142,7 +142,6 @@ app.get('/register_test', function (req, res) {
 // Authentication Required
 // app.use(auth);
 
-
 app.listen(3000, () => {
   console.log('listening on port 3000');
 });
@@ -172,7 +171,7 @@ app.post('/like', function (request, response) {
 
 // communities page
 app.get('/communities', (req, res) => {
-  let query = "select * from communities"
+  let query = "select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = 'collin';"
   db.any(query)
       .then(community => {
         res.render('pages/communities', {community})
@@ -181,3 +180,22 @@ app.get('/communities', (req, res) => {
         console.log(err);
       });
 })
+
+app.post('/communities', async (req, res) => {
+  let query;
+  console.log(req.body)
+  if(req.body.joined === 'true') {
+    query = `delete from community_member where community_id = (select community_id from communities where community_name = $1);`;
+  }
+  else {
+    query = `insert into community_member (username, community_id) values ('collin', (select community_id from communities where community_name = $1));`;
+  }
+  db.any(query, [req.body.community])
+  .then(async community => {
+    res.redirect('/communities')
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/login');
+  });
+});

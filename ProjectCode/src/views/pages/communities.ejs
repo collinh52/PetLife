@@ -6,16 +6,22 @@
 <%- include ('../partials/menu') %>
 
 <main style="top: 3.9rem;">
-<% let picture_array = ["https://static1.therichestimages.com/wordpress/wp-content/uploads/2015/02/shutterstock_Cute-Dog.jpg", "http://images6.fanpop.com/image/photos/37700000/Cat-cats-37756555-2048-1360.jpg", "https://blog.humanesociety.org/wp-content/uploads/2018/04/YELLOW-TANG-FISH-ISTOCK-486110113_381372.jpg", "http://wallup.net/wp-content/uploads/2016/10/12/387372-horse-animals.jpg", "https://www.wallpapers13.com/wp-content/uploads/2016/02/Toucan-Bird-Wallpaper-for-wallpaper-mobile-phoneand-PC-842.jpg"] %> 
+<% let picture_array = ["https://static1.therichestimages.com/wordpress/wp-content/uploads/2015/02/shutterstock_Cute-Dog.jpg", "http://images6.fanpop.com/image/photos/37700000/Cat-cats-37756555-2048-1360.jpg", "https://blog.humanesociety.org/wp-content/uploads/2018/04/YELLOW-TANG-FISH-ISTOCK-486110113_381372.jpg", "http://wallup.net/wp-content/uploads/2016/10/12/387372-horse-animals.jpg", "https://www.wallpapers13.com/wp-content/uploads/2016/02/Toucan-Bird-Wallpaper-for-wallpaper-mobile-phoneand-PC-842.jpg"] 
+    let communities = ['Dogs', 'Cats', 'Fish', 'Horses', 'Birds']
+    let joined_communities = community %> 
     <div style="display: flex; justify-content: center; position: relative; top: 8rem">
-        <% for( let index = 0; index < community.length; index++ ) { %>
+        <% for( let index = 0; index < communities.length; index++ ) { %>
             <div class="card-deck">
                 <div class="card" style="width: 18rem;">
-                    <img src="<%= picture_array[index] %> " class="card-img-top" alt="<%= community[index].community_name %>" height="200rem">
+                    <img src="<%= picture_array[index] %> " class="card-img-top" alt="<%= communities[index] %>" height="200rem">
                     <div class="card-body">
-                      <h5 class="card-title"><%= community[index].community_name %></h5>
-                      <p class="card-text">Join other lovers of <%= community[index].community_name %>!</p>
-                      <a href="#" class="btn btn-dark stretched-link" style="background-color: #0a4275">Join group</a>
+                        <form action="/communities" method="POST">
+                            <h5 class="card-title"><%= communities[index] %></h5>
+                            <p class="card-text">Join other lovers of <%= communities[index] %>!</p>
+                            <input style="display: none;" name="community" value="<%= communities[index] %>">
+                            <input name="joined" value="<%= community.some(community=>community.community_name === communities[index]) %>" style="display: none;">
+                            <button type="submit" class="btn btn-dark stretched-link" style="background-color: <%= community.some(community=>community.community_name === communities[index]) ? 'red' : '#0a4275' %>"><%= community.some(community=>community.community_name === communities[index]) ? 'Remove group' : 'Join group' %></button>
+                        </form>
                     </div>
                 </div>
             </div>
