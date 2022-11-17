@@ -2,8 +2,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const { query } = require('express');
+const { Column } = require('pg-promise');
 const app = express();
 const pgp = require('pg-promise')();
+const session = require('express-session');
 
 const user = {
   username: undefined,
@@ -11,6 +14,15 @@ const user = {
 };
 
 app.set('view engine', 'ejs');
+
+// set session
+app.use(
+  session({
+    secret: 'XASDASDA',
+    saveUninitialized: true,
+    resave: true,
+  })
+);
 
 // using bodyParser to parse JSON in the request body into JS objects
 app.use(bodyParser.json());
@@ -67,13 +79,17 @@ app.get('/', (req, res) =>{
 });
 
 app.post('/login', async (req, res) => {
-  const query = `SELECT password FROM users WHERE username = $1;`;
+  const query = `SELECT password, username FROM users WHERE username = $1;`;
   db.any(query, [req.body.username])
   .then(async user => {
     const match = await bcrypt.compare(req.body.password, user[0].password);
 
     if(match)
     {
+    req.session.user = {
+      username: user[0].username,
+    };
+    req.session.save();
     //For when we make profile page in future
     res.redirect('/home');
     }
@@ -104,6 +120,41 @@ const auth = (req, res, next) => {
 app.get('/register', (req, res) => {
   res.render('pages/register');
 });
+
+app.get('/profile', (req, res) => {
+  const {username} = req.session.user || {};
+  var query = `SELECT profile_name, bio, joined_timestamp FROM users WHERE username = $1`;
+  db.any(query, [username])
+  .then(function (rows) {
+    if( rows.length === 0)
+    {
+      // res.send(err)
+      res.render('pages/profile', {data : null, message: "error"} )
+    }
+    res.render('pages/profile', {data : rows[0]} )
+  })
+  .catch(function (err) {
+    return console.log(err);
+  });
+});
+
+//Profile page
+// app.get('/profile', function (req, res) {
+//  //Need to add profile picture to this 
+//   var query = `SELECT profile_name, bio, joined_timestamp FROM users`;
+//   db.query(query, function(error, data)
+//   {
+//     if(error)
+//     {
+//       throw error;
+//     }
+//     else
+//     {
+//       res.render('pages/profile', {title:'User Information',action: 'list', userInfo:data} )
+//     }
+//   _})
+// });
+
 
 // Register submission
 app.post('/register', async (req, res) => {
@@ -138,9 +189,14 @@ app.get('/register_test', function (req, res) {
     });
 });
 
+app.get('/logout', (req, res) =>{
+  req.session.destroy();
+  res.render('pages/login');
+  message.log('Logged out Successfully');
+});
+
 // Authentication Required
 app.use(auth);
-
 
 app.listen(3000, () => {
   console.log('listening on port 3000');
