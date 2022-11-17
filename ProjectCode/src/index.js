@@ -164,7 +164,7 @@ app.get('/profile', (req, res) => {
 
 //Profile page
 // app.get('/profile', function (req, res) {
-//  //Need to add profile picture to this 
+//  //Need to add profile picture to this
 //   var query = `SELECT profile_name, bio, joined_timestamp FROM users`;
 //   db.query(query, function(error, data)
 //   {
@@ -239,7 +239,7 @@ app.post('/new_post', function (req, res){
         username = $1`,
       [username]
     );
-    
+
   }).then(async user => {
     res.redirect('/home');
 
@@ -285,9 +285,6 @@ app.get('/logout', (req, res) =>{
 
 
 
-// For future ref, to get number of likes (display on post):
-// SELECT COUNT(like_id) AS num_likes FROM likes;
-
 // Liking
 app.post('/like', function (request, response) {
   const query =
@@ -306,6 +303,19 @@ app.post('/like', function (request, response) {
     .catch(function (err) {
       return console.log(err);
     });
+});
+
+// Getting number of likes to display on post
+app.get('/num_likes', (req, res) => {
+  var query = 'SELECT COUNT(like_id) AS num_likes FROM likes WHERE post_id = (SELECT post_id FROM posts WHERE post_id = $1);';
+  const post_id = req.body.post_id;
+  db.any(query, [post_id])
+  .then(data => {
+    res.render('home')
+  })
+  .catch(function (err) {
+    return console.log(err);
+  });
 });
 
 // Authentication Required
