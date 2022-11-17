@@ -94,7 +94,8 @@ app.get('/login', (req, res) => {
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
-  if (!req.session.user) {
+  let session_user = req?.session?.user;
+  if (session_user == undefined) {
     // Default to register page.
     return res.redirect('/register');
   }
@@ -139,7 +140,7 @@ app.get('/register_test', function (req, res) {
 });
 
 // Authentication Required
-app.use(auth);
+// app.use(auth);
 
 
 app.listen(3000, () => {
@@ -168,3 +169,15 @@ app.post('/like', function (request, response) {
       return console.log(err);
     });
 });
+
+// communities page
+app.get('/communities', (req, res) => {
+  let query = "select * from communities"
+  db.any(query)
+      .then(community => {
+        res.render('pages/communities', {community})
+      })
+      .catch(err => {
+        console.log(err);
+      });
+})
