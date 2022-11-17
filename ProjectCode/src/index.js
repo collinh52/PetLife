@@ -135,23 +135,6 @@ app.get('/profile', (req, res) => {
   });
 });
 
-//Profile page
-// app.get('/profile', function (req, res) {
-//  //Need to add profile picture to this 
-//   var query = `SELECT profile_name, bio, joined_timestamp FROM users`;
-//   db.query(query, function(error, data)
-//   {
-//     if(error)
-//     {
-//       throw error;
-//     }
-//     else
-//     {
-//       res.render('pages/profile', {title:'User Information',action: 'list', userInfo:data} )
-//     }
-//   _})
-// });
-
 
 // Register submission
 app.post('/register', async (req, res) => {
