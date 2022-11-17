@@ -189,6 +189,44 @@ app.get('/register_test', function (req, res) {
     });
 });
 
+
+app.post('/new_post', function (req, res){
+  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3)";
+  const username = req.session.user.username;
+  const caption = req.body.caption;
+  const location = req.body.location;
+
+  const post_values = [username, caption, location];
+
+
+  db.any(post_query,post_values)
+    .then(function (data)  {
+    })
+    .catch(function (err)  {
+    });
+
+  db.tx(async t => {
+    const {post_id} = await t.one(
+      `SELECT
+        MAX(post_id)
+      FROM
+        posts
+      WHERE
+        username = $1`,
+      [username]
+    );
+    
+  }).then(async user => {
+    res.redirect('/home');
+
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/register');
+  });
+});
+
+
 app.get('/logout', (req, res) =>{
   req.session.destroy();
   res.render('pages/login');
