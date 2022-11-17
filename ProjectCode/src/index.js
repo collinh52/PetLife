@@ -215,6 +215,41 @@ app.post('/new_post', function (req, res){
         username = $1`,
       [username]
     );
+
+    const picture_url = req.body.picture_url;
+    if (picure_url != Null) {
+      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
+      
+      const picture_values = [picture_url,post_id];
+
+      db.any(picture_query,picture_values)
+        .then(async data =>  {
+          const {picture_id} = await t.one(
+            `SELECT
+              MAX(picture_id)
+            FROM
+              pictures
+            WHERE
+              post_id = $1`,
+            [post_id]
+          );
+          
+          var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
+          var insert_pic_values = [picture_id, post_id];
+
+          db.any(insert_pic_query,insert_pic_values)
+          .then(async data =>  {
+          })
+          .catch(function (err)  {
+          });
+          
+
+        })
+        .catch(function (err)  {
+        });
+      
+      
+    };
     
   }).then(async user => {
     res.redirect('/home');
