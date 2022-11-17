@@ -68,15 +68,18 @@ app.get('/', (req, res) =>{
 
 app.post('/login', async (req, res) => {
   const query = `SELECT password FROM users WHERE username = $1;`;
-  db.any(query, [req.body.username])
-  .then(async user => {
-    const match = await bcrypt.compare(req.body.password, user[0].password);
-
+  username = req.body.username;
+  db.any(query, [username])
+  .then(async data => {
+    const match = await bcrypt.compare(req.body.password, data[0].password);
     if(match)
     {
-    //For when we make profile page in future
-    res.redirect('/home');
-    }
+      //For when we make profile page in future
+      user.username = username;
+      req.session.user = user;
+      req.session.save();
+      res.redirect('/home');
+      }
     else
     {
       res.redirect('/register');
@@ -141,7 +144,7 @@ app.get('/register_test', function (req, res) {
 
 app.post('/new_post', function (req, res){
   var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3)";
-  const username = req.body.username;
+  const username = req.session.user.username;
   const caption = req.body.caption;
   const location = req.body.location;
 
@@ -154,41 +157,50 @@ app.post('/new_post', function (req, res){
     .catch(function (err)  {
     });
 
-
-  const {post_id} = await t.one(
-    `SELECT
-      MAX(post_id)
-     FROM
-      posts
-     WHERE
-      username = $1`,
-    [username]
-  );
-  
-  const picture_url = req.body.picture_url;
-  if (picure_url){
-    var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
-    
-    const picture_values = [picture_url,post_id];
-
-    db.any(picture_query,picture_values)
-      .then(function (data)  {
-      })
-      .catch(function (err)  {
-      });
-    
-    const {picture_id} = await t.one(
+  db.tx(async t => {
+    const {post_id} = await t.one(
       `SELECT
-        MAX(picture_id)
+        MAX(post_id)
       FROM
-        pictures
+        posts
       WHERE
-        post_id = $1`,
-      [post_id]
+        username = $1`,
+      [username]
     );
     
+    const picture_url = req.body.picture_url;
+    if (picure_url){
+      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
+      
+      const picture_values = [picture_url,post_id];
 
-  };
+      db.any(picture_query,picture_values)
+        .then(function (data)  {
+        })
+        .catch(function (err)  {
+        });
+      
+      const {picture_id} = await t.one(
+        `SELECT
+          MAX(picture_id)
+        FROM
+          pictures
+        WHERE
+          post_id = $1`,
+        [post_id]
+      );
+      
+
+    };
+  }).then(async user => {
+    const match = await bcrypt.compare(req.body.password, user[0].password);
+    res.redirect('/home');
+
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/register');
+  });
 });
 
 
