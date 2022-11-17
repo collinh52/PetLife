@@ -2,15 +2,51 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const { query } = require('express');
+const { Column } = require('pg-promise');
 const app = express();
 const pgp = require('pg-promise')();
+const session = require('express-session');
+const path = require("path");
+const multer  = require('multer');
+const fs = require('fs');
+const cloudinary = require("cloudinary").v2;
+
 
 const user = {
   username: undefined,
   password: undefined,
 };
 
+
+//setting up multer for file uploading
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads')
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+})
+const upload = multer({ storage: storage })
+
+//connecting to cloudinary db
+cloudinary.config({
+  cloud_name: 'diaoicqwt',
+  api_key: '977326122325792',
+  api_secret: 'WnmdmGp6TPC4lNye657MmlmzorI'
+});
+
 app.set('view engine', 'ejs');
+
+// set session
+app.use(
+  session({
+    secret: 'XASDASDA',
+    saveUninitialized: true,
+    resave: true,
+  })
+);
 
 // using bodyParser to parse JSON in the request body into JS objects
 app.use(bodyParser.json());
@@ -67,13 +103,17 @@ app.get('/', (req, res) =>{
 });
 
 app.post('/login', async (req, res) => {
-  const query = `SELECT password FROM users WHERE username = $1;`;
+  const query = `SELECT password, username FROM users WHERE username = $1;`;
   db.any(query, [req.body.username])
   .then(async user => {
     const match = await bcrypt.compare(req.body.password, user[0].password);
 
     if(match)
     {
+    req.session.user = {
+      username: user[0].username,
+    };
+    req.session.save();
     //For when we make profile page in future
     res.redirect('/home');
     // req.session.save()
@@ -105,6 +145,41 @@ const auth = (req, res, next) => {
 app.get('/register', (req, res) => {
   res.render('pages/register');
 });
+
+app.get('/profile', (req, res) => {
+  const {username} = req.session.user || {};
+  var query = `SELECT profile_name, bio, joined_timestamp FROM users WHERE username = $1`;
+  db.any(query, [username])
+  .then(function (rows) {
+    if( rows.length === 0)
+    {
+      // res.send(err)
+      res.render('pages/profile', {data : null, message: "error"} )
+    }
+    res.render('pages/profile', {data : rows[0]} )
+  })
+  .catch(function (err) {
+    return console.log(err);
+  });
+});
+
+//Profile page
+// app.get('/profile', function (req, res) {
+//  //Need to add profile picture to this 
+//   var query = `SELECT profile_name, bio, joined_timestamp FROM users`;
+//   db.query(query, function(error, data)
+//   {
+//     if(error)
+//     {
+//       throw error;
+//     }
+//     else
+//     {
+//       res.render('pages/profile', {title:'User Information',action: 'list', userInfo:data} )
+//     }
+//   _})
+// });
+
 
 // Register submission
 app.post('/register', async (req, res) => {
@@ -139,12 +214,77 @@ app.get('/register_test', function (req, res) {
     });
 });
 
-// Authentication Required
-// app.use(auth);
 
-app.listen(3000, () => {
-  console.log('listening on port 3000');
+app.post('/new_post', function (req, res){
+  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3)";
+  const username = req.session.user.username;
+  const caption = req.body.caption;
+  const location = req.body.location;
+
+  const post_values = [username, caption, location];
+
+
+  db.any(post_query,post_values)
+    .then(function (data)  {
+    })
+    .catch(function (err)  {
+    });
+
+  db.tx(async t => {
+    const {post_id} = await t.one(
+      `SELECT
+        MAX(post_id)
+      FROM
+        posts
+      WHERE
+        username = $1`,
+      [username]
+    );
+    
+  }).then(async user => {
+    res.redirect('/home');
+
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/register');
+  });
 });
+
+
+app.get('/logout', (req, res) =>{
+  req.session.destroy();
+  res.render('pages/login');
+  message.log('Logged out Successfully');
+});
+
+
+//upload api
+//image is uploaded, added to uploads folder, added to cloudinary, and deleted from uploads folder
+  app.post('/upload', upload.single('image_file'), async (req, res) => {
+
+        await cloudinary.uploader.upload(req.file.path)
+                  .then((result) => {
+                    res.status(200).send({
+                      message: "Image Successfully Uploaded",
+                      result,
+                    });
+                  }).catch((error) => {
+                    res.status(500).send({
+                      message: "Image Upload Failed",
+                      error,
+                    });
+                  });
+
+        await fs.unlink(req.file.path, (err) => {
+          if (err) {
+            console.error(err)
+            return
+          };
+        });
+  });
+
+
 
 // For future ref, to get number of likes (display on post):
 // SELECT COUNT(like_id) AS num_likes FROM likes;
@@ -199,3 +339,9 @@ app.post('/communities', async (req, res) => {
     res.redirect('/login');
   });
 });
+// Authentication Required
+   app.use(auth);
+
+   app.listen(3000, () => {
+     console.log('listening on port 3000');
+   });
