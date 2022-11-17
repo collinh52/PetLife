@@ -135,7 +135,7 @@ app.get('/login', (req, res) => {
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
-  if (req?.session?.user == undefined) {
+  if (!req.session.user) {
     // Default to register page.
     return res.redirect('/register');
   }
@@ -311,7 +311,7 @@ app.post('/like', function (request, response) {
 
 // communities page
 app.get('/communities', (req, res) => {
-  let query = "select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = 'collin';"
+  let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
   db.any(query)
       .then(community => {
         res.render('pages/communities', {community})
@@ -328,7 +328,7 @@ app.post('/communities', async (req, res) => {
     query = `delete from community_member where community_id = (select community_id from communities where community_name = $1);`;
   }
   else {
-    query = `insert into community_member (username, community_id) values ('collin', (select community_id from communities where community_name = $1));`;
+    query = `insert into community_member (username, community_id) values ('${req.session.user.username}', (select community_id from communities where community_name = $1));`;
   }
   db.any(query, [req.body.community])
   .then(async community => {
