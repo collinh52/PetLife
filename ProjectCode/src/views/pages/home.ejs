@@ -5,9 +5,10 @@
   <div class="container" style="display: flex; flex-direction: row; padding-right: 0; margin-left: 18rem;">
     <div class="container">
       <!-- the index will be less than posts.length. This will render all the posts pulled from the database. -->
-      <% for (let index = 0; index < 4; index++) {%>
+      <% for (let i = 0; i < data.length; i++) {%>
         <ul style="z-index: 1;">
-          <%- include ('../partials/post') %>
+          <h1><%= data[i].username %></h1>
+          <img src="<%= data[i].profile_image_url %>" width = '200' height = '200'>
         </ul>
         <hr class="style1">
       <% }%>
