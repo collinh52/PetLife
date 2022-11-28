@@ -116,6 +116,7 @@ app.post('/login', async (req, res) => {
     req.session.save();
     //For when we make profile page in future
     res.redirect('/home');
+    // req.session.save()
     }
     else
     {
@@ -305,6 +306,36 @@ app.post('/like', function (request, response) {
     });
 });
 
+// communities page
+app.get('/communities', (req, res) => {
+  let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
+  db.any(query)
+      .then(community => {
+        res.render('pages/communities', {community})
+      })
+      .catch(err => {
+        console.log(err);
+      });
+})
+
+app.post('/communities', async (req, res) => {
+  let query;
+  console.log(req.body)
+  if(req.body.joined === 'true') {
+    query = `delete from community_member where community_id = (select community_id from communities where community_name = $1);`;
+  }
+  else {
+    query = `insert into community_member (username, community_id) values ('${req.session.user.username}', (select community_id from communities where community_name = $1));`;
+  }
+  db.any(query, [req.body.community])
+  .then(async community => {
+    res.redirect('/communities')
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/login');
+  });
+});
 // Getting number of likes to display on post
 app.get('/num_likes', (req, res) => {
   var query = 'SELECT COUNT(like_id) AS num_likes FROM likes WHERE post_id = (SELECT post_id FROM posts WHERE post_id = $1);';
