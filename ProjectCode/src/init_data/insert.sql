@@ -33,7 +33,8 @@ INSERT INTO communities (community_id, community_name) VALUES
 
 INSERT INTO community_member (username, community_id) VALUES 
 ('collin', 1),
-('johnson',2),
+('collin', 2),
+('johnson',2),  
 ('fishlover5',3),
 ('mary',4),
 ('tweet',5);
