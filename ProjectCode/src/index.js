@@ -223,27 +223,25 @@ app.post('/new_post', function (req, res){
   const post_values = [username, caption, location];
 
 
-  // post_id = db.any(post_query,post_values)
-  //   .then(function (data)  {
-  //   })
-  //   .catch(function (err)  {
-  //   });
+  db.any(post_query,post_values)
+    .then(function (data)  {
+    })
+    .catch(function (err)  {
+    });
 
   db.tx(async t => {
-    // const post_id = await t.one(
-    //   `SELECT
-    //     MAX(post_id)
-    //   FROM
-    //     posts
-    //   WHERE
-    //     username = $1`,
-    //   [username]
-    // );
-
-    const result = await t.query(post_query,post_values);
-    const post_id = result.rows[0].post_id;
+    const post_id = await t.one(
+      `SELECT
+        MAX(post_id)
+      FROM
+        posts
+      WHERE
+        username = $1`,
+      [username]
+    );
 
     const picture_url = req.body.picture_url;
+    
     if (picture_url != null) {
       var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
       
@@ -275,9 +273,8 @@ app.post('/new_post', function (req, res){
         .catch(function (err)  {
         });
       
-      
     };
-    
+
   }).then(async user => {
     res.redirect('/home');
 
