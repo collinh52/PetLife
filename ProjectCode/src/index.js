@@ -191,7 +191,7 @@ app.get('/register_test', function (req, res) {
 
 
 app.post('/new_post', function (req, res){
-  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3)";
+  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3) RETURNING post_id";
   const username = req.session.user.username;
   const caption = req.body.caption;
   const location = req.body.location;
@@ -199,25 +199,28 @@ app.post('/new_post', function (req, res){
   const post_values = [username, caption, location];
 
 
-  db.any(post_query,post_values)
-    .then(function (data)  {
-    })
-    .catch(function (err)  {
-    });
+  // post_id = db.any(post_query,post_values)
+  //   .then(function (data)  {
+  //   })
+  //   .catch(function (err)  {
+  //   });
 
   db.tx(async t => {
-    const {post_id} = await t.one(
-      `SELECT
-        MAX(post_id)
-      FROM
-        posts
-      WHERE
-        username = $1`,
-      [username]
-    );
+    // const post_id = await t.one(
+    //   `SELECT
+    //     MAX(post_id)
+    //   FROM
+    //     posts
+    //   WHERE
+    //     username = $1`,
+    //   [username]
+    // );
+
+    const result = await t.query(post_query,post_values);
+    const post_id = result.rows[0].post_id;
 
     const picture_url = req.body.picture_url;
-    if (picure_url != Null) {
+    if (picture_url != null) {
       var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
       
       const picture_values = [picture_url,post_id];
