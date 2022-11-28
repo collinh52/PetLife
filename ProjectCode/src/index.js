@@ -224,26 +224,30 @@ app.get('/logout', (req, res) =>{
 //image is uploaded, added to uploads folder, added to cloudinary, and deleted from uploads folder
   app.post('/upload', upload.single('image_file'), async (req, res) => {
 
-        await cloudinary.uploader.upload(req.file.path)
-                  .then((result) => {
-                    res.status(200).send({
-                      message: "Image Successfully Uploaded",
-                      result,
-                    });
-                  }).catch((error) => {
-                    res.status(500).send({
-                      message: "Image Upload Failed",
-                      error,
-                    });
-                  });
+    const query = 'INSERT INTO pictures(picture_id, picture_url) VALUES ($1, $2)';
 
-        await fs.unlink(req.file.path, (err) => {
-          if (err) {
-            console.error(err)
-            return
-          };
-        });
-  });
+      const temp = await cloudinary.uploader.upload(req.file.path)
+
+          await fs.unlink(req.file.path, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            };
+          });
+    
+  await db.any(query, [temp.public_id,temp.url])
+  .then((data) => {
+        res.status(200).send({
+           message: "Image Successfully Uploaded",
+           data,
+           })
+      .catch(function (err) {
+        return console.log(err);
+      });
+     });
+    
+    });
+
 
 
 
