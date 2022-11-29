@@ -60,7 +60,7 @@ app.use(
 const message = 'Hey there!';
 // defining a default endpoint
 app.get('/', (req, res) => {
-  res.send(message)
+  res.render('pages/register.ejs')
 });
 
 app.get('/home', (req, res) => {
@@ -215,23 +215,33 @@ app.get('/register_test', function (req, res) {
 });
 
 
-app.post('/new_post', function (req, res){
-  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3) RETURNING post_id";
+app.post('/new_post', upload.single('picture_file'), async (req, res) =>{
+  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3) RETURNING post_id;";
   const username = req.session.user.username;
   const caption = req.body.caption;
   const location = req.body.location;
 
   const post_values = [username, caption, location];
 
+  const temp = await cloudinary.uploader.upload(req.file.path)
+  const picture_url = temp.url;
 
-  db.any(post_query,post_values)
+  await fs.unlink(req.file.path, (err) => {
+    if (err) {
+      console.error(err)
+      return
+    };
+  });
+
+  await db.any(post_query,post_values)
     .then(function (data)  {
     })
     .catch(function (err)  {
+      return console.log(err);
     });
 
-  db.tx(async t => {
-    const post_id = await t.one(
+  await db.tx(async t => {
+    var post_id = await t.one(
       `SELECT
         MAX(post_id)
       FROM
@@ -240,17 +250,16 @@ app.post('/new_post', function (req, res){
         username = $1`,
       [username]
     );
-
-    const picture_url = req.body.picture_url;
+    post_id = post_id["max"];
     
     if (picture_url != null) {
-      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2)";
+      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2) RETURNING picture_id;";
       
       const picture_values = [picture_url,post_id];
 
-      db.any(picture_query,picture_values)
+      await db.any(picture_query,picture_values)
         .then(async data =>  {
-          const {picture_id} = await t.one(
+          var picture_id = await t.one(
             `SELECT
               MAX(picture_id)
             FROM
@@ -259,19 +268,22 @@ app.post('/new_post', function (req, res){
               post_id = $1`,
             [post_id]
           );
+          picture_id = picture_id["max"];
           
           var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
           var insert_pic_values = [picture_id, post_id];
 
-          db.any(insert_pic_query,insert_pic_values)
+          await db.any(insert_pic_query,insert_pic_values)
           .then(async data =>  {
           })
           .catch(function (err)  {
+            return console.log(err);
           });
           
 
         })
         .catch(function (err)  {
+          return console.log(err);
         });
       
     };
@@ -282,7 +294,7 @@ app.post('/new_post', function (req, res){
   })
   .catch(async err=> {
     console.log(err)
-    res.redirect('/register');
+    return console.log(err);
   });
 });
 
