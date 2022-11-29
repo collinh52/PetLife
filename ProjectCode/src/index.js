@@ -66,7 +66,8 @@ app.get('/', (req, res) => {
 app.get('/home', (req, res) => {
   //åres.render('pages/home.ejs');
   
-  var query = 'SELECT * FROM posts';
+  //var query = 'SELECT * FROM pictures';
+  var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
   db.any(query)
     .then(function (rows) {
       console.log(rows)
