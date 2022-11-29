@@ -56,15 +56,14 @@ app.use(
   })
 );
 
-
-const message = 'Hey there!';
-// defining a default endpoint
-app.get('/', (req, res) => {
-  res.send(message)
-});
-
 app.get('/home', (req, res) => {
-  res.render('pages/home.ejs')
+  if(!req.session.user) {
+    console.log("ur not logged in idiot")
+    res.redirect('/login')
+  }
+  else{
+    res.render('pages/home.ejs')
+  }
 });
 
 app.get('/new_post', (req, res) => {
@@ -107,7 +106,7 @@ app.post('/login', async (req, res) => {
   db.any(query, [req.body.username])
   .then(async user => {
     const match = await bcrypt.compare(req.body.password, user[0].password);
-
+    console.log(match, "help")
     if(match)
     {
     req.session.user = {
@@ -147,20 +146,25 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
-  const {username} = req.session.user || {};
-  var query = `SELECT profile_name, bio, joined_timestamp FROM users WHERE username = $1`;
-  db.any(query, [username])
-  .then(function (rows) {
-    if( rows.length === 0)
-    {
-      // res.send(err)
-      res.render('pages/profile', {data : null, message: "error"} )
-    }
-    res.render('pages/profile', {data : rows[0]} )
-  })
-  .catch(function (err) {
-    return console.log(err);
-  });
+  if(!req.session.user) {
+    res.redirect('/login')
+  }
+  else{
+    const {username} = req.session.user || {};
+    var query = `SELECT profile_name, bio, joined_timestamp FROM users WHERE username = $1`;
+    db.any(query, [username])
+    .then(function (rows) {
+      if( rows.length === 0)
+      {
+        // res.send(err)
+        res.render('pages/profile', {data : null, message: "error"} )
+      }
+      res.render('pages/profile', {data : rows[0]} )
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
+  }
 });
 
 //Profile page
@@ -308,14 +312,19 @@ app.post('/like', function (request, response) {
 
 // communities page
 app.get('/communities', (req, res) => {
-  let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
-  db.any(query)
-      .then(community => {
-        res.render('pages/communities', {community})
-      })
-      .catch(err => {
-        console.log(err);
-      });
+  if(req.session.user){
+    let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
+    db.any(query)
+        .then(community => {
+          res.render('pages/communities', {community})
+        })
+        .catch(err => {
+          console.log(err);
+        });
+  }
+  else{
+    res.redirect('/login')
+  }
 })
 
 app.post('/communities', async (req, res) => {
