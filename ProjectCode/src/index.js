@@ -165,7 +165,7 @@ app.get('/register', (req, res) => {
 
 app.get('/profile', (req, res) => {
   const {username} = req.session.user || {};
-  var query = `SELECT profile_name, bio, joined_timestamp FROM users WHERE username = $1`;
+  var query = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = $1`;
   db.any(query, [username])
   .then(function (rows) {
     if( rows.length === 0)
