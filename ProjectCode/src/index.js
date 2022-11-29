@@ -7,11 +7,35 @@ const { Column } = require('pg-promise');
 const app = express();
 const pgp = require('pg-promise')();
 const session = require('express-session');
+const path = require("path");
+const multer  = require('multer');
+const fs = require('fs');
+const cloudinary = require("cloudinary").v2;
+
 
 const user = {
   username: undefined,
   password: undefined,
 };
+
+
+//setting up multer for file uploading
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads')
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+})
+const upload = multer({ storage: storage })
+
+//connecting to cloudinary db
+cloudinary.config({
+  cloud_name: 'diaoicqwt',
+  api_key: '977326122325792',
+  api_secret: 'WnmdmGp6TPC4lNye657MmlmzorI'
+});
 
 app.set('view engine', 'ejs');
 
@@ -36,7 +60,7 @@ app.use(
 const message = 'Hey there!';
 // defining a default endpoint
 app.get('/', (req, res) => {
-  res.send(message)
+  res.render('pages/register.ejs')
 });
 
 app.get('/home', (req, res) => {
@@ -92,6 +116,7 @@ app.post('/login', async (req, res) => {
     req.session.save();
     //For when we make profile page in future
     res.redirect('/home');
+    // req.session.save()
     }
     else
     {
@@ -138,6 +163,23 @@ app.get('/profile', (req, res) => {
   });
 });
 
+//Profile page
+// app.get('/profile', function (req, res) {
+//  //Need to add profile picture to this
+//   var query = `SELECT profile_name, bio, joined_timestamp FROM users`;
+//   db.query(query, function(error, data)
+//   {
+//     if(error)
+//     {
+//       throw error;
+//     }
+//     else
+//     {
+//       res.render('pages/profile', {title:'User Information',action: 'list', userInfo:data} )
+//     }
+//   _})
+// });
+
 
 // Register submission
 app.post('/register', async (req, res) => {
@@ -172,21 +214,124 @@ app.get('/register_test', function (req, res) {
     });
 });
 
+
+app.post('/new_post', upload.single('picture_file'), async (req, res) =>{
+  var post_query = "INSERT INTO posts (username, caption, location) VALUES ($1, $2, $3) RETURNING post_id;";
+  const username = req.session.user.username;
+  const caption = req.body.caption;
+  const location = req.body.location;
+
+  const post_values = [username, caption, location];
+
+  const temp = await cloudinary.uploader.upload(req.file.path)
+  const picture_url = temp.url;
+
+  await fs.unlink(req.file.path, (err) => {
+    if (err) {
+      console.error(err)
+      return
+    };
+  });
+
+  await db.any(post_query,post_values)
+    .then(function (data)  {
+    })
+    .catch(function (err)  {
+      return console.log(err);
+    });
+
+  await db.tx(async t => {
+    var post_id = await t.one(
+      `SELECT
+        MAX(post_id)
+      FROM
+        posts
+      WHERE
+        username = $1`,
+      [username]
+    );
+    post_id = post_id["max"];
+    
+    if (picture_url != null) {
+      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2) RETURNING picture_id;";
+      
+      const picture_values = [picture_url,post_id];
+
+      await db.any(picture_query,picture_values)
+        .then(async data =>  {
+          var picture_id = await t.one(
+            `SELECT
+              MAX(picture_id)
+            FROM
+              pictures
+            WHERE
+              post_id = $1`,
+            [post_id]
+          );
+          picture_id = picture_id["max"];
+          
+          var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
+          var insert_pic_values = [picture_id, post_id];
+
+          await db.any(insert_pic_query,insert_pic_values)
+          .then(async data =>  {
+          })
+          .catch(function (err)  {
+            return console.log(err);
+          });
+          
+
+        })
+        .catch(function (err)  {
+          return console.log(err);
+        });
+      
+    };
+
+  }).then(async user => {
+    res.redirect('/home');
+
+  })
+  .catch(async err=> {
+    console.log(err)
+    return console.log(err);
+  });
+});
+
+
 app.get('/logout', (req, res) =>{
   req.session.destroy();
   res.render('pages/login');
   message.log('Logged out Successfully');
 });
 
-// Authentication Required
-app.use(auth);
 
-app.listen(3000, () => {
-  console.log('listening on port 3000');
-});
+//upload api
+//image is uploaded, added to uploads folder, added to cloudinary, and deleted from uploads folder
+  app.post('/upload', upload.single('image_file'), async (req, res) => {
 
-// For future ref, to get number of likes (display on post):
-// SELECT COUNT(like_id) AS num_likes FROM likes;
+        await cloudinary.uploader.upload(req.file.path)
+                  .then((result) => {
+                    res.status(200).send({
+                      message: "Image Successfully Uploaded",
+                      result,
+                    });
+                  }).catch((error) => {
+                    res.status(500).send({
+                      message: "Image Upload Failed",
+                      error,
+                    });
+                  });
+
+        await fs.unlink(req.file.path, (err) => {
+          if (err) {
+            console.error(err)
+            return
+          };
+        });
+  });
+
+
 
 // Liking
 app.post('/like', function (request, response) {
@@ -207,3 +352,53 @@ app.post('/like', function (request, response) {
       return console.log(err);
     });
 });
+
+// communities page
+app.get('/communities', (req, res) => {
+  let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
+  db.any(query)
+      .then(community => {
+        res.render('pages/communities', {community})
+      })
+      .catch(err => {
+        console.log(err);
+      });
+})
+
+app.post('/communities', async (req, res) => {
+  let query;
+  console.log(req.body)
+  if(req.body.joined === 'true') {
+    query = `delete from community_member where community_id = (select community_id from communities where community_name = $1);`;
+  }
+  else {
+    query = `insert into community_member (username, community_id) values ('${req.session.user.username}', (select community_id from communities where community_name = $1));`;
+  }
+  db.any(query, [req.body.community])
+  .then(async community => {
+    res.redirect('/communities')
+  })
+  .catch(async err=> {
+    console.log(err)
+    res.redirect('/login');
+  });
+});
+// Getting number of likes to display on post
+app.get('/num_likes', (req, res) => {
+  var query = 'SELECT COUNT(like_id) AS num_likes FROM likes WHERE post_id = (SELECT post_id FROM posts WHERE post_id = $1);';
+  const post_id = req.body.post_id;
+  db.any(query, [post_id])
+  .then(data => {
+    res.render('home')
+  })
+  .catch(function (err) {
+    return console.log(err);
+  });
+});
+
+// Authentication Required
+   app.use(auth);
+
+   app.listen(3000, () => {
+     console.log('listening on port 3000');
+   });
