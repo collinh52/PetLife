@@ -64,7 +64,23 @@ app.get('/', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-  res.render('pages/home.ejs')
+  //åres.render('pages/home.ejs');
+  
+  var query = 'SELECT * FROM posts';
+  db.any(query)
+    .then(function (rows) {
+      console.log(rows)
+      
+      if (rows.length === 0)
+      {
+        res.render('pages/home', {data : null, message: "error"})
+      }
+      res.render('pages/home', {data : rows})
+    //res.render('pages/home.ejs');
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
 });
 
 app.get('/new_post', (req, res) => {
