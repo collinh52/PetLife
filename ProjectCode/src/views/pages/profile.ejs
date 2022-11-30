@@ -51,7 +51,13 @@
                         <h6 class="mb-0">Pet Type</h6>
                       </div>
                       <div class="col-md-auto text-secondary">
-                          <%= data.pet_type %>
+                        <% if (communities.length == 0) {%>
+                          <h4>No communities joined.</h4>
+                        <%} else {%>
+                          <% for (let i = 0; i < communities.length; i++) {%>
+                            <h4><%= communities[i].community_id %></h4>
+                          <% }%>
+                        <% }%>
                       </div>
                     </div>
                     <hr>
@@ -85,10 +91,6 @@
                                   <div class="mb-3">
                                     <label for="bio" class="col-form-label">Bio:</label>
                                     <input type="" class="form-control" value="<%= data.bio %>" name="bio" id="bio">
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="pet_type" class="col-form-label">Pet type:</label>
-                                    <input type="text" class="form-control" value="<%= data.pet_type %>" name="pet_type" id="pet_type">
                                   </div>
                                   <div class="mb-3">
                                     <label for="birthday" class="col-form-label">Birthday:</label>

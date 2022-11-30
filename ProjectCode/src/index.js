@@ -175,15 +175,21 @@ app.get('/profile', (req, res) => {
   }
   else{
     const {username} = req.session.user || {};
-    var query = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = $1`;
-    db.any(query, [username])
+    var users = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = '${username}'`;
+    var communities = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = '${username}'`;
+    db.task('get-everything',  task => {
+      return task.batch([
+          task.any(users),
+          task.any(communities)
+      ]);
+   })
     .then(function (rows) {
-      if( rows.length === 0)
-      {
-        // res.send(err)
-        res.render('pages/profile', {data : null, message: "error"} )
-      }
-      res.render('pages/profile', {data : rows[0]} )
+      // if( rows.length === 0)
+      // {
+      //   // res.send(err)
+      //   res.render('pages/profile', {data : null, message: "error"} )
+      // }
+      res.render('pages/profile', {communities : rows[1], data : rows[0]} )
     })
     .catch(function (err) {
       return console.log(err);
