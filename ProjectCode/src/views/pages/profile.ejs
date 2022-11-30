@@ -1,19 +1,12 @@
 <%- include ('../partials/header') %> 
 <%- include ('../partials/menu') %>
 
+
 <main style="position: absolute; top: 3.9rem; bottom: 4rem">
+  
   <div class="container">
       <div class="main-body">
-      
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb" class="main-breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item"><a href="javascript:void(0)">User</a></li>
-                <li class="breadcrumb-item active" aria-current="page">User Profile</li>
-              </ol>
-            </nav>
-            <!-- /Breadcrumb -->
+      <br>
       
             <div class="row gutters-sm">
               <div class="col-md-4 mb-3">
@@ -21,7 +14,9 @@
                   <div class="card-body">
                     <div class="d-flex flex-column align-items-center text-center">
                       <!--COLLIN PUT IMAGE URL BELOW-->
-                      <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="150">
+                      <div >
+                        <img src="<%= data.profile_image_url %>" alt="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/microsoft/319/dog-face_1f436.png" width="200" height="200">
+                      </div>
                       <div class="mt-3">
                         <h4>Name: <%= data.profile_name %></h4>
                         <p class="text-secondary mb-1">Bio: <%= data.bio %></p>
@@ -44,13 +39,12 @@
                     <hr>
                     <div class="row">
                       <div class="col-sm-3">
-                        <h6 class="mb-0">Joined Time</h6>
+                        <h6 class="mb-0">Joined on</h6>
                       </div>
                       <div class="col-sm-9 text-secondary">
-                          <%= data.joined_timestamp %>
+                          <%= moment(data.joined_timestamp).format('YYYY-MM-DD') %>
                       </div>
                     </div>
-                    <hr>
                     <hr>
                     <div class="row">
                       <div class="col-sm-3">
@@ -65,8 +59,8 @@
                       <div class="col-sm-3">
                         <h6 class="mb-0">Birthday</h6>
                       </div>
-                      <div class="col-sm-9 text-secondary">
-                          <%= data.birthday %>
+                      <div class="col-sm-9 text-secondary" type=>
+                          <%= moment(data.birthday).format('YYYY-MM-DD')  %>
                       </div>
                     </div>
                     <hr>
@@ -98,7 +92,7 @@
                                   </div>
                                   <div class="mb-3">
                                     <label for="birthday" class="col-form-label">Birthday:</label>
-                                    <input type="date" class="form-control" name="birthday" id="birthday">
+                                    <input type="date" class="form-control" value="<%= moment(data.birthday).format('YYYY-MM-DD') %>" name="birthday" id="birthday" required>
                                   </div>
                               </div>
                               <div class="modal-footer">

@@ -11,7 +11,12 @@ const path = require("path");
 const multer  = require('multer');
 const fs = require('fs');
 const cloudinary = require("cloudinary").v2;
+const moment = require("moment");
 
+app.use((req, res, next)=>{
+    res.locals.moment = moment;
+    next();
+  });
 
 const user = {
   username: undefined,
@@ -55,7 +60,6 @@ app.use(
     extended: true,
   })
 );
-
 
 const message = 'Hey there!';
 // defining a default endpoint
@@ -324,9 +328,19 @@ app.post('/edit_profile', upload.single('profile_picture'), async (req, res) =>{
   const profile_name = req.body.profile_name;
   const birthday = req.body.birthday;
 
-
   try {
-    if (fs.existsSync(req.file.path)) {
+    if (!req.file) {
+      const values = [profile_name, bio, pet_type, birthday, username];
+      var query = "UPDATE users SET profile_name = $1, bio = $2, pet_type = $3, birthday = $4  WHERE username = $5;";
+    
+      await db.any(query,values)
+        .then(function (data)  {
+          res.redirect('/profile');
+        })
+        .catch(function (err)  {
+          return console.log(err);
+        });
+    } else {
       const temp = await cloudinary.uploader.upload(req.file.path)
       const profile_image_url = temp.url;
     
@@ -339,18 +353,6 @@ app.post('/edit_profile', upload.single('profile_picture'), async (req, res) =>{
     
       const values = [profile_name, bio, profile_image_url, pet_type, birthday, username];
       var query = "UPDATE users SET profile_name = $1, bio = $2, profile_image_url = $3, pet_type = $4, birthday = $5  WHERE username = $6;";
-    
-      await db.any(query,values)
-        .then(function (data)  {
-          res.redirect('/profile');
-        })
-        .catch(function (err)  {
-          return console.log(err);
-        });
-
-    } else {
-      const values = [profile_name, bio, pet_type, birthday, username];
-      var query = "UPDATE users SET profile_name = $1, bio = $2, pet_type = $3, birthday = $4  WHERE username = $5;";
     
       await db.any(query,values)
         .then(function (data)  {
