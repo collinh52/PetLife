@@ -6,15 +6,42 @@
     <div class="container">
       <!-- the index will be less than posts.length. This will render all the posts pulled from the database. -->
       <% for (let i = 0; i < data.length; i++) {%>
-        <ul style="z-index: 1;">
-          <h1><%= data[i].username %></h1>
-          <img src="<%= data[i].picture_url %>" width="400">
-          <p><%= data[i].caption %></p>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
-            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-          </svg>
-          <p><%= data[i].location %></p>
-          
+        <style>
+        .card {
+          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+          transition: 0.3s;
+          width: 40%;
+        }
+
+        .card:hover {
+          box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+
+        .container {
+          padding: 2px 16px;
+        }
+        </style>
+        </head>
+        <body>
+
+
+        <div class="card">
+          <img src="<%= data[i].picture_url %>" alt="Avatar" style="width:100%">
+          <div class="container">
+            <br>
+            <h4><b><%= data[i].username %></b></h4> 
+            <hr>
+            <p><%= data[i].caption %></p> 
+            <hr>
+            <h6><b><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+              <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+            </svg>&nbsp<%= data[i].location %></b></h6> 
+          </div>
+        </div>
+
+        </body>
+        </html>      
+        <!-- 
           <div onload="
                 app.get('/num_likes', (req, res) => {
                 var query = 'SELECT COUNT(like_id) AS num_likes FROM likes WHERE post_id = (SELECT post_id FROM posts WHERE post_id = $1);';
@@ -27,10 +54,11 @@
                     return console.log(err);
                 });
                 });">
+                
             likes
             </div>
-
-            <!-- Like Button -->
+            
+            Like Button
             <html lang="en">
             <head>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -39,20 +67,25 @@
             <body>
 
             <form action="/like" method = "post">
-              <!-- Submit button -->
               <input type="hidden" name="post_id" value="<%= data[i].post_id %>" />
               <input type="hidden" name="username" value="<%= data[i].username %>" />
               <input type="submit" class="btn btn-outline-danger" data-bs-toggle="button" value="Like" id = "liked"><br>
-        </ul>
+            
+
         <hr class="style1">
-      <% }%>
-    </div>
-    <ul class="list-group" style="position: fixed; right: 0; bottom: 4.5rem; margin-right: 1rem; margin-top: 1rem;">
+        <ul class="list-group" style="position: fixed; right: 0; bottom: 4.5rem; margin-right: 1rem; margin-top: 1rem;">
       <a href="/new_post">
         <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="#0a4275" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
           <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
         </svg>
       </a>
+
+               -->
+              <br>
+        </ul>
+      <% }%>
+    </div>
+    
     </ul>
   </div>
 </main>
