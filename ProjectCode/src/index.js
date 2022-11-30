@@ -56,32 +56,28 @@ app.use(
   })
 );
 
-
-const message = 'Hey there!';
-// defining a default endpoint
-app.get('/', (req, res) => {
-  res.render('pages/register.ejs')
-});
-
 app.get('/home', (req, res) => {
+  if(!req.session.user) {
+    console.log("ur not logged in idiot")
+    res.redirect('/login')
+  }
+  else{
+    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
+    db.any(query)
+      .then(function (rows) {
+        console.log(rows)
+        
+        if (rows.length === 0)
+        {
+          res.render('pages/home', {data : null, message: "error"})
+        }
+        res.render('pages/home', {data : rows})
+      })
+      .catch(function (err) {
+        return console.log(err);
+      });
+  }
   //åres.render('pages/home.ejs');
-  
-  //var query = 'SELECT * FROM pictures';
-  var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
-  db.any(query)
-    .then(function (rows) {
-      console.log(rows)
-      
-      if (rows.length === 0)
-      {
-        res.render('pages/home', {data : null, message: "error"})
-      }
-      res.render('pages/home', {data : rows})
-    //res.render('pages/home.ejs');
-    })
-    .catch(function (err) {
-      return console.log(err);
-    });
 });
 
 app.get('/new_post', (req, res) => {
@@ -124,7 +120,7 @@ app.post('/login', async (req, res) => {
   db.any(query, [req.body.username])
   .then(async user => {
     const match = await bcrypt.compare(req.body.password, user[0].password);
-
+    console.log(match, "help")
     if(match)
     {
     req.session.user = {
@@ -164,20 +160,25 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
-  const {username} = req.session.user || {};
-  var query = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = $1`;
-  db.any(query, [username])
-  .then(function (rows) {
-    if( rows.length === 0)
-    {
-      // res.send(err)
-      res.render('pages/profile', {data : null, message: "error"} )
-    }
-    res.render('pages/profile', {data : rows[0]} )
-  })
-  .catch(function (err) {
-    return console.log(err);
-  });
+  if(!req.session.user) {
+    res.redirect('/login')
+  }
+  else{
+    const {username} = req.session.user || {};
+    var query = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = $1`;
+    db.any(query, [username])
+    .then(function (rows) {
+      if( rows.length === 0)
+      {
+        // res.send(err)
+        res.render('pages/profile', {data : null, message: "error"} )
+      }
+      res.render('pages/profile', {data : rows[0]} )
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
+  }
 });
 
 //Profile page
@@ -372,14 +373,19 @@ app.post('/like', function (request, response) {
 
 // communities page
 app.get('/communities', (req, res) => {
-  let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
-  db.any(query)
-      .then(community => {
-        res.render('pages/communities', {community})
-      })
-      .catch(err => {
-        console.log(err);
-      });
+  if(req.session.user){
+    let query = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`
+    db.any(query)
+        .then(community => {
+          res.render('pages/communities', {community})
+        })
+        .catch(err => {
+          console.log(err);
+        });
+  }
+  else{
+    res.redirect('/login')
+  }
 })
 
 app.post('/communities', async (req, res) => {
