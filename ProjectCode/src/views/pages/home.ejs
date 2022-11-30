@@ -8,7 +8,41 @@
       <% for (let i = 0; i < data.length; i++) {%>
         <ul style="z-index: 1;">
           <h1><%= data[i].username %></h1>
-          <img src="<%= data[i].profile_image_url %>" width = '200' height = '200'>
+          <img src="<%= data[i].picture_url %>" width="400">
+          <p><%= data[i].caption %></p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+          <p><%= data[i].location %></p>
+          
+          <div onload="
+                app.get('/num_likes', (req, res) => {
+                var query = 'SELECT COUNT(like_id) AS num_likes FROM likes WHERE post_id = (SELECT post_id FROM posts WHERE post_id = $1);';
+                const post_id = req.body.post_id;
+                db.any(query, [post_id])
+                .then(data => {
+                    res.render('home')
+                })
+                .catch(function (err) {
+                    return console.log(err);
+                });
+                });">
+            likes
+            </div>
+
+            <!-- Like Button -->
+            <html lang="en">
+            <head>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+            </head>
+            <body>
+
+            <form action="/like" method = "post">
+              <!-- Submit button -->
+              <input type="hidden" name="post_id" value="<%= data[i].post_id %>" />
+              <input type="hidden" name="username" value="<%= data[i].username %>" />
+              <input type="submit" class="btn btn-outline-danger" data-bs-toggle="button" value="Like" id = "liked"><br>
         </ul>
         <hr class="style1">
       <% }%>

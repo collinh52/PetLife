@@ -73,24 +73,21 @@ app.get('/home', (req, res) => {
     res.redirect('/login')
   }
   else{
-    var query = 'SELECT * FROM posts';
-    db.any(query)
-      .then(function (rows) {
-        console.log(rows)
-        
-        if (rows.length === 0)
-        {
-          res.render('pages/home', {data : null, message: "error"})
-        }
-        res.render('pages/home', {data : rows})
-      //res.render('pages/home.ejs');
-      })
-      .catch(function (err) {
-        return console.log(err);
-      });
+    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
+  db.any(query)
+    .then(function (rows) {
+      console.log(rows)
+      
+      if (rows.length === 0)
+      {
+        res.render('pages/home', {data : null, message: "error"})
+      }
+      res.render('pages/home', {data : rows})
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
   }
-  //åres.render('pages/home.ejs');
-  
 });
 
 app.get('/new_post', (req, res) => {
