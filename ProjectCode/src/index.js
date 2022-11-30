@@ -243,79 +243,95 @@ app.post('/new_post', upload.single('picture_file'), async (req, res) =>{
 
   const post_values = [username, caption, location];
 
-  const temp = await cloudinary.uploader.upload(req.file.path)
-  const picture_url = temp.url;
-
-  await fs.unlink(req.file.path, (err) => {
-    if (err) {
-      console.error(err)
-      return
-    };
-  });
-
-  await db.any(post_query,post_values)
-    .then(function (data)  {
-    })
-    .catch(function (err)  {
-      return console.log(err);
-    });
-
-  await db.tx(async t => {
-    var post_id = await t.one(
-      `SELECT
-        MAX(post_id)
-      FROM
-        posts
-      WHERE
-        username = $1`,
-      [username]
-    );
-    post_id = post_id["max"];
+  try {
+    if (!req.file) {
+      await db.any(post_query,post_values)
+      .then(function (data)  {
+        res.redirect('/home');
+      })
+      .catch(function (err)  {
+        return console.log(err);
+      });
+    } else {
+      await db.any(post_query,post_values)
+      .then(function (data)  {
+      })
+      .catch(function (err)  {
+        return console.log(err);
+      });
+ 
+      const temp = await cloudinary.uploader.upload(req.file.path)
+      const picture_url = temp.url;
     
-    if (picture_url != null) {
-      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2) RETURNING picture_id;";
-      
-      const picture_values = [picture_url,post_id];
-
-      await db.any(picture_query,picture_values)
-        .then(async data =>  {
-          var picture_id = await t.one(
-            `SELECT
-              MAX(picture_id)
-            FROM
-              pictures
-            WHERE
-              post_id = $1`,
-            [post_id]
-          );
-          picture_id = picture_id["max"];
+      await fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error(err)
+          return
+        };
+      });
+    
+      await db.tx(async t => {
+        var post_id = await t.one(
+          `SELECT
+            MAX(post_id)
+          FROM
+            posts
+          WHERE
+            username = $1`,
+          [username]
+        );
+        post_id = post_id["max"];
+        
+        if (picture_url != null) {
+          var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2) RETURNING picture_id;";
           
-          var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
-          var insert_pic_values = [picture_id, post_id];
-
-          await db.any(insert_pic_query,insert_pic_values)
-          .then(async data =>  {
-          })
-          .catch(function (err)  {
-            return console.log(err);
-          });
+          const picture_values = [picture_url,post_id];
+    
+          await db.any(picture_query,picture_values)
+            .then(async data =>  {
+              var picture_id = await t.one(
+                `SELECT
+                  MAX(picture_id)
+                FROM
+                  pictures
+                WHERE
+                  post_id = $1`,
+                [post_id]
+              );
+              picture_id = picture_id["max"];
+              
+              var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
+              var insert_pic_values = [picture_id, post_id];
+    
+              await db.any(insert_pic_query,insert_pic_values)
+              .then(async data =>  {
+              })
+              .catch(function (err)  {
+                return console.log(err);
+              });
+              
+    
+            })
+            .catch(function (err)  {
+              return console.log(err);
+            });
           
+        };
+    
+      }).then(async user => {
+        res.redirect('/home');
+    
+      })
+      .catch(async err=> {
+        console.log(err)
+        return console.log(err);
+      });
+    }
+  } catch(err) {
+    console.error(err);
+  };
 
-        })
-        .catch(function (err)  {
-          return console.log(err);
-        });
-      
-    };
 
-  }).then(async user => {
-    res.redirect('/home');
-
-  })
-  .catch(async err=> {
-    console.log(err)
-    return console.log(err);
-  });
 });
 
 
