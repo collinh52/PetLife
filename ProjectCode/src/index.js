@@ -176,7 +176,7 @@ app.get('/profile', (req, res) => {
   else{
     const {username} = req.session.user || {};
     var users = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = '${username}'`;
-    var communities = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = '${username}'`;
+    var communities = `select community_name from communities join community_member on communities.community_id = community_member.community_id where community_member.username = '${req.session.user.username}';`;
     db.task('get-everything',  task => {
       return task.batch([
           task.any(users),
