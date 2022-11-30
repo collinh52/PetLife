@@ -1,0 +1,27 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+<main>
+  <div class="container">
+    <h1><span class="badge bg-primary"></span><p class="fst-italic"></p>New Post</h1>
+    <hr>
+
+    <form action="/new_post" method = "POST" enctype="multipart/form-data">
+
+        <label for="exampleFormControlFile1">Image (file input)</label><br>
+        <input type="file" class="form-control-file" name="picture_file" id="exampleFormControlFile1"><br><br>
+
+        <label for="lname">Caption</label><br>
+        <input size = "100" type="text" id="lname" name="caption" value=""><br><br>
+
+        <label for="lname">Location</label><br>
+        <input type="text" id="lname" name="location" value=""><br><br>
+        <br>
+        <input type="submit" class="btn btn-primary btn-block mb-4" value="Create Post"><br>
+        <hr>
+        <a href="/home">Back to home</a>
+      </form>
+  </div>
+</main>
+
+<%- include ('../partials/footer') %>
