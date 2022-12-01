@@ -34,6 +34,7 @@ CREATE TABLE posts(
     video_id INTEGER,
     caption VARCHAR(400),
     location VARCHAR(50),
+    num_likes INTEGER DEFAULT 0,
     FOREIGN KEY(username) REFERENCES users(username),
 	FOREIGN KEY(picture_id) REFERENCES pictures(picture_id),
     FOREIGN KEY(video_id) REFERENCES videos(video_id)

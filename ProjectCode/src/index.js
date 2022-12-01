@@ -480,6 +480,7 @@ app.get('/logout', (req, res) =>{
 
 app.post('/like', async (req, res) => {
   let query;
+  let query2;
   const username = req.session.user.username;
   const post_id = req.body.post_id;
   const values = [post_id, username];
@@ -491,7 +492,6 @@ app.post('/like', async (req, res) => {
   await db.any(check_query, check_values)
   .then( function(data) {
     liked = data.length;
-    console.log(data);
   })
   .catch(function (err) {
     console.log(err);
@@ -499,12 +499,21 @@ app.post('/like', async (req, res) => {
 
   if(liked === 1) {
     query = "DELETE FROM likes WHERE (post_id = $1) AND (username = $2);";
+    query2 = "UPDATE posts SET num_likes = (SELECT count(*) FROM likes WHERE (post_id = $1)) WHERE post_id = $2";
   }
   else {
     query = "INSERT INTO likes (post_id, username) VALUES ($1, $2);";
+    query2 = "UPDATE posts SET num_likes = (SELECT count(*) FROM likes WHERE (post_id = $1)) WHERE post_id = $2";
   }
 
   await db.any(query, values)
+  .then( like => {
+  })
+  .catch( err=> {
+    console.log(err);
+  });
+
+  await db.any(query2, [post_id, post_id])
   .then( like => {
     res.redirect('/home');
   })
