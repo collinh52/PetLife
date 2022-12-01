@@ -20,7 +20,7 @@
                             <p class="card-text">Join other lovers of <%= communities[index] %>!</p>
                             <input style="display: none;" name="community" value="<%= communities[index] %>">
                             <input name="joined" value="<%= community.some(community=>community.community_name === communities[index]) %>" style="display: none;">
-                            <button type="submit" class="btn btn-dark stretched-link" style="background-color: <%= community.some(community=>community.community_name === communities[index]) ? 'red' : '#0a4275' %>"><%= community.some(community=>community.community_name === communities[index]) ? 'Remove group' : 'Join group' %></button>
+                            <button type="submit" class="btn btn-dark stretched-link" style="background-color: '<%= community.some(community=>community.community_name === communities[index]) ? 'red' : '#0a4275' %>'"><%= community.some(community=>community.community_name === communities[index]) ? 'Remove group' : 'Join group' %></button>
                         </form>
                     </div>
                 </div>
