@@ -78,7 +78,7 @@ app.get('/home', (req, res) => {
     res.redirect('/login')
   }
   else{
-    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
+    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id ORDER BY posts.post_id DESC FETCH FIRST 200 ROWS ONLY;';
   db.any(query)
     .then(function (rows) {
       console.log(rows)
