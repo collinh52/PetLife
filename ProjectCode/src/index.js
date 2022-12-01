@@ -67,13 +67,18 @@ app.get('/', (req, res) => {
   res.render('pages/register.ejs')
 });
 
+app.use(function(req, res, next) {
+  res.locals.user = req.session.user;
+  next();
+});
+
 app.get('/home', (req, res) => {
   if(!req.session.user) {
     console.log("ur not logged in idiot")
     res.redirect('/login')
   }
   else{
-    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
+    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id ORDER BY posts.post_id DESC FETCH FIRST 200 ROWS ONLY;';
   db.any(query)
     .then(function (rows) {
       console.log(rows)
@@ -192,6 +197,30 @@ app.get('/profile', (req, res) => {
         return console.log(err);
       });
        // res.render('pages/profile', {data : rows[0]} )
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
+  }
+});
+
+
+app.post('/profile', (req, res) => {
+  if(!req.session.user) {
+    res.redirect('/login')
+  }
+  else {
+    const username = req.body.username;
+
+    var query = `SELECT profile_name, bio, joined_timestamp, birthday, pet_type, profile_image_url, username FROM users WHERE username = $1`;
+    db.any(query, [username])
+    .then(function (rows) {
+      if( rows.length === 0)
+      {
+        // res.send(err)
+        res.render('pages/profile_other', {data : null, message: "error"} )
+      }
+      res.render('pages/profile_other', {data : rows[0]} )
     })
     .catch(function (err) {
       return console.log(err);
@@ -449,24 +478,103 @@ app.get('/logout', (req, res) =>{
 
 
 // Liking
-app.post('/like', function (request, response) {
-  const query =
-    'INSERT INTO likes (post_id, username) VALUES ($1, $2) RETURNING * ;';
-  db.any(query, [
-    request.body.post_id,
-    request.body.username,
-  ])
-    .then(function (data) {
-      response.status(201).json({
-        status: 'success',
-        data: data,
-        message: 'Liked!',
-      });
-    })
-    .catch(function (err) {
-      return console.log(err);
-    });
+// app.post('/like', function (request, response) {
+//   const query =
+//     'INSERT INTO likes (post_id, username) VALUES ($1, $2) RETURNING * ;';
+//   db.any(query, [
+//     request.body.post_id,
+//     request.body.username,
+//   ])
+//     .then(function (data) {
+//       response.status(201).json({
+//         status: 'success',
+//         data: data,
+//         message: 'Liked!',
+//       });
+//     })
+//     .catch(function (err) {
+//       return console.log(err);
+//     });
+// });
+
+
+app.post('/like', async (req, res) => {
+  let query;
+  let query2;
+  const username = req.session.user.username;
+  const post_id = req.body.post_id;
+  const values = [post_id, username];
+
+
+  const check_query = 'SELECT * FROM likes WHERE (post_id = $1) AND (username = $2);';
+  const check_values = [post_id, req.session.user.username];
+  var liked = 0;
+  await db.any(check_query, check_values)
+  .then( function(data) {
+    liked = data.length;
+  })
+  .catch(function (err) {
+    console.log(err);
+  });
+
+  if(liked === 1) {
+    query = "DELETE FROM likes WHERE (post_id = $1) AND (username = $2);";
+    query2 = "UPDATE posts SET num_likes = (SELECT count(*) FROM likes WHERE (post_id = $1)) WHERE post_id = $2";
+  }
+  else {
+    query = "INSERT INTO likes (post_id, username) VALUES ($1, $2);";
+    query2 = "UPDATE posts SET num_likes = (SELECT count(*) FROM likes WHERE (post_id = $1)) WHERE post_id = $2";
+  }
+
+  await db.any(query, values)
+  .then( like => {
+  })
+  .catch( err=> {
+    console.log(err);
+  });
+
+  await db.any(query2, [post_id, post_id])
+  .then( like => {
+    res.redirect('/home');
+  })
+  .catch( err=> {
+    console.log(err);
+  });
 });
+
+// Getting number of likes to display on post
+app.get('/num_likes', (req, res) => {
+  var query = 'SELECT * FROM likes WHERE (post_id = $1);';
+  const post_id = req.body.post_id;
+  var likes = 0;
+  db.any(query, [post_id])
+  .then( function(data) {
+    likes = data.length;
+    res.render('/home',{
+      likes: likes
+    });
+  })
+  .catch(function (err) {
+    console.log(err);
+  });
+
+});
+
+// Checks if a post is liked or not
+// app.get('/liked'), (req, res) => {
+//   var query = 'SELECT COUNT(like_id) FROM likes WHERE post_id = $1 AND username = $2;';
+//   const username = req.session.user.username;
+//   const post_id = req.body.post_id;
+//   const values = [post_id, username];
+  
+//   db.any(query, [post_id])
+//   .then(function(liked) {
+//     res.send(liked);
+//   })
+//   .catch(function (err) {
+//     return console.log(err);
+//   });
+// }
 
 // communities page
 app.get('/communities', (req, res) => {
@@ -504,18 +612,7 @@ app.post('/communities', async (req, res) => {
     res.redirect('/login');
   });
 });
-// Getting number of likes to display on post
-app.get('/num_likes', (req, res) => {
-  var query = 'SELECT COUNT(like_id) AS num_likes FROM likes WHERE post_id = (SELECT post_id FROM posts WHERE post_id = $1);';
-  const post_id = req.body.post_id;
-  db.any(query, [post_id])
-  .then(data => {
-    res.render('home')
-  })
-  .catch(function (err) {
-    return console.log(err);
-  });
-});
+
 
 // Authentication Required
    app.use(auth);
