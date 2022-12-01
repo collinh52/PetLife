@@ -5,18 +5,18 @@ INSERT INTO users (username, password, profile_name, bio, profile_image_url, ema
 ('mary', 'pass', 'Secretariat', 'Triple Crown Winner', '', 'faster_than_you@gmail.com','Horse','2010-07-08','2022-11-03 02:02:02' ),
 ('tweet', '1111', 'Tweety', 'About me', '', 'tweet@gmail.com','Bird','2011-12-08','2022-11-03 02:02:02' );
 
--- INSERT INTO pictures (picture_id, picture_url, post_id) VALUES (1, 'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=1.00xw:0.669xh;0,0.190xh&resize=640:*', 1);
+INSERT INTO pictures (picture_url, post_id) VALUES ('https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=1.00xw:0.669xh;0,0.190xh&resize=640:*', 1);
 
 -- INSERT INTO videos (video_id, video_url, post_id) VALUES ();
 
--- INSERT INTO posts (post_id, username, picture_id, caption, location) VALUES (1, 'collin', 1, 'Good boy', 'Boulder, CO');
+INSERT INTO posts (username, picture_id, caption, location) VALUES ('collin', 1, 'Good boy', 'Boulder, CO');
 
 
--- INSERT INTO likes (like_id, post_id, username) VALUES (1, 1, 'johnson'),
--- (2,1,'mary'),
--- (3,1,'tweet');
+INSERT INTO likes (post_id, username) VALUES (1, 'johnson'),
+(1,'mary'),
+(1,'tweet');
 
--- INSERT INTO comments (comment_id, comment_text, post_id, username) values (1, 'Very cool', 1, 'johnson');
+INSERT INTO comments (comment_text, post_id, username) values ('Very cool', 1, 'johnson');
 
 INSERT INTO followers (follower_id, following_id) VALUES ('collin', 'johnson'),
 ('johnson', 'collin'),

@@ -1,0 +1,80 @@
+<%- include ('../partials/header') %> 
+<%- include ('../partials/menu') %>
+
+
+<main style="position: absolute; top: 3.9rem; bottom: 4rem">
+  
+      <style>
+        body {
+          background-image: url('https://res.cloudinary.com/diaoicqwt/image/upload/v1669830641/pawprint-background_jtv0kq.jpg');
+        }
+    </style>
+  
+  <div class="container">
+      <div class="main-body">
+      <br>
+      
+            <div class="row">
+              <div class="col-md-auto">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex flex-column align-items-center text-center">
+                      <!--COLLIN PUT IMAGE URL BELOW-->
+                      <div >
+                        <img class="avatar" src="<%= data.profile_image_url %>" onerror="this.onerror=null;this.src='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/microsoft/319/dog-face_1f436.png';" width="200" height="200">
+                      </div>
+                      <div class="mt-3">
+                        <h4>Name: <%= data.profile_name %></h4>
+                        <p class="text-secondary mb-1">Bio: <%= data.bio %></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-auto">
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Username</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary">
+                          <%= data.username %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Joined on</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary">
+                          <%= moment(data.joined_timestamp).format('YYYY-MM-DD') %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Pet Type</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary">
+                          <%= data.pet_type %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Birthday</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary" type=>
+                          <%= moment(data.birthday).format('YYYY-MM-DD')  %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+      </div>
+  </main>
+<%- include ('../partials/footer') %>
