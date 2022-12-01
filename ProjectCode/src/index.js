@@ -183,7 +183,15 @@ app.get('/profile', (req, res) => {
         // res.send(err)
         res.render('pages/profile', {data : null, message: "error"} )
       }
-      res.render('pages/profile', {data : rows[0]} )
+      var query2 = `SELECT community_name FROM communities INNER JOIN community_member ON communities.community_id = community_member.community_id WHERE username = $1;`;
+      db.any(query2, [username])
+      .then(function (rows2) {
+        res.render('pages/profile', {data : rows[0], communities : rows2} )
+      })
+      .catch(function (err) {
+        return console.log(err);
+      });
+       // res.render('pages/profile', {data : rows[0]} )
     })
     .catch(function (err) {
       return console.log(err);
@@ -232,6 +240,18 @@ app.post('/register', async (req, res) => {
 
 // Function to list users
 app.get('/register_test', function (req, res) {
+  var query ="SELECT * FROM users";
+  db.any(query)
+    .then(function (rows) {
+      res.send(rows);
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
+});
+
+// Function to list users
+app.get('/community_test', function (req, res) {
   var query ="SELECT * FROM users";
   db.any(query)
     .then(function (rows) {
@@ -472,6 +492,7 @@ app.post('/communities', async (req, res) => {
     query = `delete from community_member where community_id = (select community_id from communities where community_name = $1);`;
   }
   else {
+
     query = `insert into community_member (username, community_id) values ('${req.session.user.username}', (select community_id from communities where community_name = $1));`;
   }
   db.any(query, [req.body.community])

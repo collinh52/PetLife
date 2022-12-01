@@ -54,10 +54,15 @@
                     <hr>
                     <div class="row">
                       <div class="col-md-auto">
-                        <h6 class="mb-0">Pet Type</h6>
+                        <h6 class="mb-0">Communities</h6>
                       </div>
-                      <div class="col-md-auto text-secondary">
-                          <%= data.pet_type %>
+                      <div class="col-md-auto text-secondary"> 
+                          <% if (communities == null || communities.length == 0) {%>
+                            <h6>No communities joined.</h6>
+                          <%} else {%>
+                            <% for (let i = 0; i < communities.length; i++) {%>
+                              <h6><%= communities[i].community_name %></h6>
+                            <% }}%>
                       </div>
                     </div>
                     <hr>
