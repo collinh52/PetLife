@@ -1,84 +1,122 @@
 <%- include ('../partials/header') %> 
 <%- include ('../partials/menu') %>
-<div class="container">
-    <div class="main-body">
-    
-          <!-- Breadcrumb -->
-          <nav aria-label="breadcrumb" class="main-breadcrumb">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-              <li class="breadcrumb-item"><a href="javascript:void(0)">User</a></li>
-              <li class="breadcrumb-item active" aria-current="page">User Profile</li>
-            </ol>
-          </nav>
-          <!-- /Breadcrumb -->
-    
-          <div class="row gutters-sm">
-            <div class="col-md-4 mb-3">
-              <div class="card">
-                <div class="card-body">
-                  <div class="d-flex flex-column align-items-center text-center">
-                    <!--COLLIN PUT IMAGE URL BELOW-->
-                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" class="rounded-circle" width="150">
-                    <div class="mt-3">
-                      <h4>Name: <%= data.profile_name %></h4>
-                      <p class="text-secondary mb-1">Bio: <%= data.bio %></p>
+
+
+<main style="position: absolute; top: 3.9rem; bottom: 4rem">
+  
+      <style>
+        body {
+          background-image: url('https://res.cloudinary.com/diaoicqwt/image/upload/v1669830641/pawprint-background_jtv0kq.jpg');
+        }
+    </style>
+  
+  <div class="container">
+      <div class="main-body">
+      <br>
+      
+            <div class="row">
+              <div class="col-md-auto">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex flex-column align-items-center text-center">
+                      <!--COLLIN PUT IMAGE URL BELOW-->
+                      <div >
+                        <img class="avatar" src="<%= data.profile_image_url %>" onerror="this.onerror=null;this.src='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/microsoft/319/dog-face_1f436.png';" width="200" height="200">
+                      </div>
+                      <div class="mt-3">
+                        <h4>Name: <%= data.profile_name %></h4>
+                        <p class="text-secondary mb-1">Bio: <%= data.bio %></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-auto">
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Username</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary">
+                          <%= data.username %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Joined on</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary">
+                          <%= moment(data.joined_timestamp).format('YYYY-MM-DD') %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Pet Type</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary">
+                          <%= data.pet_type %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-auto">
+                        <h6 class="mb-0">Birthday</h6>
+                      </div>
+                      <div class="col-md-auto text-secondary" type=>
+                          <%= moment(data.birthday).format('YYYY-MM-DD')  %>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" >Edit</button>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="edit_profile">Edit profile for username</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                <form action="/edit_profile" method = "POST" enctype="multipart/form-data">
+                                  <label for="profile_picture">Profile Picture</label><br>
+                                  <input type="file" class="form-control-file" name="profile_picture" id="profile_picture"><br><br>
+                                  <div class="mb-3">
+                                    <label for="profile_name" class="col-form-label">Name:</label>
+                                    <input type="text" class="form-control" value="<%= data.profile_name %>" name="profile_name" id="profile_name">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="bio" class="col-form-label">Bio:</label>
+                                    <input type="" class="form-control" value="<%= data.bio %>" name="bio" id="bio">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="pet_type" class="col-form-label">Pet type:</label>
+                                    <input type="text" class="form-control" value="<%= data.pet_type %>" name="pet_type" id="pet_type">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="birthday" class="col-form-label">Birthday:</label>
+                                    <input type="date" class="form-control" value="<%= moment(data.birthday).format('YYYY-MM-DD') %>" name="birthday" id="birthday" required>
+                                  </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input type="submit" class="btn btn-primary" value="Save"><br>
+                              </div>
+                            </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="col-md-8">
-              <div class="card mb-3">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Username</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                        <%= data.username %>
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Joined Time</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                        <%= data.joined_timestamp %>
-                    </div>
-                  </div>
-                  <hr>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Pet Type</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                        <%= data.pet_type %>
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-3">
-                      <h6 class="mb-0">Birthday</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                        <%= data.Birthday %>
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="row">
-                    <div class="col-sm-12">
-                      <a class="btn btn-info " target="__blank" href="https://www.bootdey.com/snippets/view/profile-edit-data-and-skills">Edit</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
-
-        </div>
-    </div>
-
+      </div>
+  </main>
 <%- include ('../partials/footer') %>

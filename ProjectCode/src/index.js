@@ -11,7 +11,12 @@ const path = require("path");
 const multer  = require('multer');
 const fs = require('fs');
 const cloudinary = require("cloudinary").v2;
+const moment = require("moment");
 
+app.use((req, res, next)=>{
+    res.locals.moment = moment;
+    next();
+  });
 
 const user = {
   username: undefined,
@@ -56,30 +61,33 @@ app.use(
   })
 );
 
+const message = 'Hey there!';
+// defining a default endpoint
+app.get('/', (req, res) => {
+  res.render('pages/register.ejs')
+});
+
 app.get('/home', (req, res) => {
   if(!req.session.user) {
     console.log("ur not logged in idiot")
     res.redirect('/login')
   }
   else{
-    var query = 'SELECT * FROM posts';
-    db.any(query)
-      .then(function (rows) {
-        console.log(rows)
-        
-        if (rows.length === 0)
-        {
-          res.render('pages/home', {data : null, message: "error"})
-        }
-        res.render('pages/home', {data : rows})
-      //res.render('pages/home.ejs');
-      })
-      .catch(function (err) {
-        return console.log(err);
-      });
+    var query = 'SELECT * FROM posts INNER JOIN pictures ON posts.picture_id = pictures.picture_id;';
+  db.any(query)
+    .then(function (rows) {
+      console.log(rows)
+      
+      if (rows.length === 0)
+      {
+        res.render('pages/home', {data : null, message: "error"})
+      }
+      res.render('pages/home', {data : rows})
+    })
+    .catch(function (err) {
+      return console.log(err);
+    });
   }
-  //åres.render('pages/home.ejs');
-  
 });
 
 app.get('/new_post', (req, res) => {
@@ -243,79 +251,146 @@ app.post('/new_post', upload.single('picture_file'), async (req, res) =>{
 
   const post_values = [username, caption, location];
 
-  const temp = await cloudinary.uploader.upload(req.file.path)
-  const picture_url = temp.url;
-
-  await fs.unlink(req.file.path, (err) => {
-    if (err) {
-      console.error(err)
-      return
-    };
-  });
-
-  await db.any(post_query,post_values)
-    .then(function (data)  {
-    })
-    .catch(function (err)  {
-      return console.log(err);
-    });
-
-  await db.tx(async t => {
-    var post_id = await t.one(
-      `SELECT
-        MAX(post_id)
-      FROM
-        posts
-      WHERE
-        username = $1`,
-      [username]
-    );
-    post_id = post_id["max"];
+  try {
+    if (!req.file) {
+      await db.any(post_query,post_values)
+      .then(function (data)  {
+        res.redirect('/home');
+      })
+      .catch(function (err)  {
+        return console.log(err);
+      });
+    } else {
+      await db.any(post_query,post_values)
+      .then(function (data)  {
+      })
+      .catch(function (err)  {
+        return console.log(err);
+      });
+ 
+      const temp = await cloudinary.uploader.upload(req.file.path)
+      const picture_url = temp.url;
     
-    if (picture_url != null) {
-      var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2) RETURNING picture_id;";
-      
-      const picture_values = [picture_url,post_id];
-
-      await db.any(picture_query,picture_values)
-        .then(async data =>  {
-          var picture_id = await t.one(
-            `SELECT
-              MAX(picture_id)
-            FROM
-              pictures
-            WHERE
-              post_id = $1`,
-            [post_id]
-          );
-          picture_id = picture_id["max"];
+      await fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error(err)
+          return
+        };
+      });
+    
+      await db.tx(async t => {
+        var post_id = await t.one(
+          `SELECT
+            MAX(post_id)
+          FROM
+            posts
+          WHERE
+            username = $1`,
+          [username]
+        );
+        post_id = post_id["max"];
+        
+        if (picture_url != null) {
+          var picture_query = "INSERT INTO pictures (picture_url, post_id) VALUES ($1, $2) RETURNING picture_id;";
           
-          var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
-          var insert_pic_values = [picture_id, post_id];
-
-          await db.any(insert_pic_query,insert_pic_values)
-          .then(async data =>  {
-          })
-          .catch(function (err)  {
-            return console.log(err);
-          });
+          const picture_values = [picture_url,post_id];
+    
+          await db.any(picture_query,picture_values)
+            .then(async data =>  {
+              var picture_id = await t.one(
+                `SELECT
+                  MAX(picture_id)
+                FROM
+                  pictures
+                WHERE
+                  post_id = $1`,
+                [post_id]
+              );
+              picture_id = picture_id["max"];
+              
+              var insert_pic_query = "UPDATE posts SET picture_id = $1 WHERE post_id = $2";
+              var insert_pic_values = [picture_id, post_id];
+    
+              await db.any(insert_pic_query,insert_pic_values)
+              .then(async data =>  {
+              })
+              .catch(function (err)  {
+                return console.log(err);
+              });
+              
+    
+            })
+            .catch(function (err)  {
+              return console.log(err);
+            });
           
+        };
+    
+      }).then(async user => {
+        res.redirect('/home');
+    
+      })
+      .catch(async err=> {
+        console.log(err)
+        return console.log(err);
+      });
+    }
+  } catch(err) {
+    console.error(err);
+  };
 
+
+});
+
+
+
+app.post('/edit_profile', upload.single('profile_picture'), async (req, res) =>{
+  
+  const username = req.session.user.username;
+  const bio = req.body.bio;
+  const pet_type = req.body.pet_type;
+  const profile_name = req.body.profile_name;
+  const birthday = req.body.birthday;
+
+  try {
+    if (!req.file) {
+      const values = [profile_name, bio, pet_type, birthday, username];
+      var query = "UPDATE users SET profile_name = $1, bio = $2, pet_type = $3, birthday = $4  WHERE username = $5;";
+    
+      await db.any(query,values)
+        .then(function (data)  {
+          res.redirect('/profile');
         })
         .catch(function (err)  {
           return console.log(err);
         });
-      
-    };
+    } else {
+      const temp = await cloudinary.uploader.upload(req.file.path)
+      const profile_image_url = temp.url;
+    
+      await fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error(err)
+          return
+        };
+      });
+    
+      const values = [profile_name, bio, profile_image_url, pet_type, birthday, username];
+      var query = "UPDATE users SET profile_name = $1, bio = $2, profile_image_url = $3, pet_type = $4, birthday = $5  WHERE username = $6;";
+    
+      await db.any(query,values)
+        .then(function (data)  {
+          res.redirect('/profile');
+        })
+        .catch(function (err)  {
+          return console.log(err);
+        });
+    }
+  } catch(err) {
+    console.error(err);
+  };
 
-  }).then(async user => {
-    res.redirect('/home');
 
-  })
-  .catch(async err=> {
-    console.log(err)
-    return console.log(err);
-  });
 });
 
 
